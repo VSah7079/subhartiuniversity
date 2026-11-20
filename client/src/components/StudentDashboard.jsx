@@ -63,6 +63,15 @@ export default function StudentDashboard({ student, onLogout, showToast, onOpenA
   const noticesList = (student.notices && student.notices.length > 0) ? student.notices : [
     {
       id: 'notice-1',
+      title: 'Summer/Winter Industry Internship Program 2026-27 & Corporate NOC Application',
+      refNo: 'SVSU/TPO/INTERN/2026/782',
+      date: '19 Nov 2026',
+      category: 'Internship',
+      description: 'Applications are invited from eligible students for official Industry Internship and Corporate Training NOC approvals. Submit company offer letters before 15 Dec 2026.',
+      signatory: 'Head, Training & Placement Cell, SVSU Meerut'
+    },
+    {
+      id: 'notice-2',
       title: 'Odd Semester Regular & Carry-Over Examination Schedule 2026-27',
       refNo: 'SVSU/EXAM/2026/1084',
       date: '18 Nov 2026',
@@ -71,7 +80,7 @@ export default function StudentDashboard({ student, onLogout, showToast, onOpenA
       signatory: 'Controller of Examinations, Swami Vivekanand Subharti University'
     },
     {
-      id: 'notice-2',
+      id: 'notice-3',
       title: 'Pre-Placement Drive & Technical Mock Interviews by Infosys & Wipro',
       refNo: 'SVSU/TPO/2026/512',
       date: '12 Nov 2026',
@@ -80,7 +89,7 @@ export default function StudentDashboard({ student, onLogout, showToast, onOpenA
       signatory: 'Head, Training & Placement Cell, SVSU Meerut'
     },
     {
-      id: 'notice-3',
+      id: 'notice-4',
       title: 'Annual TechFest "Subharti Hackathon 2026" Problem Statements Released',
       refNo: 'SVSU/CSE/2026/89',
       date: '05 Nov 2026',
@@ -114,12 +123,16 @@ export default function StudentDashboard({ student, onLogout, showToast, onOpenA
 
   const handleDownloadLetter = (letterType) => {
     downloadOfficialLetter(student, letterType);
-    showToast(`Official ${letterType === 'bonafide' ? 'Bonafide' : 'Character'} Certificate generated!`, 'success');
+    let docName = 'Certificate';
+    if (letterType === 'bonafide') docName = 'Bonafide Certificate';
+    else if (letterType === 'character') docName = 'Character Certificate';
+    else if (letterType === 'internship') docName = 'Internship Recommendation & NOC';
+    showToast(`Official ${docName} generated!`, 'success');
   };
 
   const handleDownloadNoticeLetter = (notice) => {
     downloadNotice(notice);
-    showToast(`Official Circular (${notice.refNo}) generated!`, 'success');
+    showToast(`Official Notis (${notice.refNo}) generated!`, 'success');
   };
 
   // Currently active result dataset
@@ -230,7 +243,7 @@ export default function StudentDashboard({ student, onLogout, showToast, onOpenA
               onClick={() => setActiveTab('notices')}
             >
               <span className="tab-icon">📜</span>
-              <span>Letters & Notices</span>
+              <span>Internship & Notis</span>
             </button>
           </nav>
 
@@ -384,8 +397,8 @@ export default function StudentDashboard({ student, onLogout, showToast, onOpenA
                 <div className="dash-panel-card">
                   <div className="panel-card-header">
                     <div>
-                      <h3>Official Notices & Circulars</h3>
-                      <p>Latest notifications from SVSU Registrar Office</p>
+                      <h3>Internship & Notis Circulars</h3>
+                      <p>Latest notifications from SVSU Registrar & TPO Office</p>
                     </div>
                     <button className="panel-action-link" onClick={() => setActiveTab('notices')}>
                       View All ({noticesList.length}) ➔
@@ -403,9 +416,9 @@ export default function StudentDashboard({ student, onLogout, showToast, onOpenA
                           <button
                             className="notice-dl-pill"
                             onClick={() => handleDownloadNoticeLetter(notice)}
-                            title="Download official circular letter"
+                            title="Download official internship / notis"
                           >
-                            ⬇ Download Letter
+                            ⬇ Download Notis
                           </button>
                         </div>
                       </div>
@@ -614,10 +627,23 @@ export default function StudentDashboard({ student, onLogout, showToast, onOpenA
 
               {/* Certificates & Letters Section */}
               <div className="letters-section-container">
-                <h3>Official Certificates & Letters Repository</h3>
-                <p>Click any document to generate, view, and download an official letterhead certificate:</p>
+                <h3>Official Certificates & Internship Letters Repository</h3>
+                <p>Click any document to generate, view, and download an official letterhead document:</p>
 
                 <div className="letters-grid">
+                  {/* Internship Recommendation & NOC Letter */}
+                  <div className="letter-item-card">
+                    <div className="letter-icon">💼</div>
+                    <div className="letter-info">
+                      <h4>Internship Recommendation & NOC</h4>
+                      <p>Official University No-Objection Certificate (NOC) and recommendation letter for industry internship.</p>
+                      <span className="ref-badge">Ref: SVSU/REG/INTERN/2026</span>
+                    </div>
+                    <button className="letter-download-btn" onClick={() => handleDownloadLetter('internship')}>
+                      <span>⬇</span> Download Internship
+                    </button>
+                  </div>
+
                   {/* Bonafide Certificate */}
                   <div className="letter-item-card">
                     <div className="letter-icon">📜</div>
@@ -1044,14 +1070,14 @@ export default function StudentDashboard({ student, onLogout, showToast, onOpenA
           )}
 
           {/* ========================================================
-              8. LETTERS & NOTICES TAB
+              8. INTERNSHIP & NOTIS TAB
           ======================================================== */}
           {activeTab === 'notices' && (
             <div className="tab-view-container animate-fade">
               <div className="section-header-bar">
                 <div>
-                  <h2>University Circulars & Official Notice Letters</h2>
-                  <p>Official communication letters published by Swami Vivekanand Subharti University</p>
+                  <h2>Internship Offers & University Notis Letters</h2>
+                  <p>Official communication letters and internship circulars published by Swami Vivekanand Subharti University</p>
                 </div>
               </div>
 
@@ -1077,13 +1103,13 @@ export default function StudentDashboard({ student, onLogout, showToast, onOpenA
                         className="btn-view-notice"
                         onClick={() => setSelectedNotice(notice)}
                       >
-                        <span>👁</span> View Full Notice Letter
+                        <span>👁</span> View Full Notis / Internship
                       </button>
                       <button
                         className="btn-download-notice"
                         onClick={() => handleDownloadNoticeLetter(notice)}
                       >
-                        <span>⬇</span> Download Official Letter (PDF)
+                        <span>⬇</span> Download Internship / Notis (PDF)
                       </button>
                     </div>
                   </div>
@@ -1094,14 +1120,14 @@ export default function StudentDashboard({ student, onLogout, showToast, onOpenA
         </main>
       </div>
 
-      {/* Modal: View Official Notice Letter */}
+      {/* Modal: View Official Internship / Notis Document */}
       {selectedNotice && (
         <div className="modal-overlay" onClick={() => setSelectedNotice(null)}>
           <div className="modal-box notice-modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-brand-header">
                 <h3>SWAMI VIVEKANAND SUBHARTI UNIVERSITY</h3>
-                <p>Official Letterhead • {selectedNotice.category}</p>
+                <p>Official Internship & Notis Document • {selectedNotice.category}</p>
               </div>
               <button className="modal-close" onClick={() => setSelectedNotice(null)}>&times;</button>
             </div>
@@ -1137,7 +1163,7 @@ export default function StudentDashboard({ student, onLogout, showToast, onOpenA
                   handleDownloadNoticeLetter(selectedNotice);
                 }}
               >
-                <span>🖨</span> Download / Print Official Letter
+                <span>🖨</span> Download / Print Internship / Notis Letter
               </button>
             </div>
           </div>

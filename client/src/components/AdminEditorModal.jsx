@@ -404,12 +404,12 @@ export default function AdminEditorModal({
     const list = [...(formData.notices || [])];
     list.unshift({
       id: `notice-${Date.now()}`,
-      title: 'New Official Notification',
-      refNo: `SVSU/GEN/2026/${Math.floor(100 + Math.random() * 900)}`,
+      title: 'New Internship / Notis Announcement',
+      refNo: `SVSU/TPO/2026/${Math.floor(100 + Math.random() * 900)}`,
       date: '20 Nov 2026',
-      category: 'Academic',
-      description: 'Official university notification text and instructions for students.',
-      signatory: 'Registrar, Swami Vivekanand Subharti University'
+      category: 'Internship',
+      description: 'Official university internship notification and guidelines for students.',
+      signatory: 'Registrar & TPO Head, Swami Vivekanand Subharti University'
     });
     setFormData((prev) => ({ ...prev, notices: list }));
   };
@@ -565,7 +565,7 @@ export default function AdminEditorModal({
             className={`admin-tab-btn ${activeTab === 'notices' ? 'active' : ''}`}
             onClick={() => setActiveTab('notices')}
           >
-            📢 Circulars ({formData.notices ? formData.notices.length : 0})
+            📢 Internship & Notis ({formData.notices ? formData.notices.length : 0})
           </button>
         </div>
 
@@ -1309,16 +1309,16 @@ export default function AdminEditorModal({
             </div>
           )}
 
-          {/* TAB 7: CIRCULARS & NOTICES */}
+          {/* TAB 7: INTERNSHIP & NOTIS */}
           {activeTab === 'notices' && (
             <div className="admin-subtable-section">
               <div className="subtable-header">
                 <div>
-                  <h4>University Circulars & Notice Board</h4>
-                  <p>Notices can be downloaded as official university signed circulars</p>
+                  <h4>University Internship & Notis Board</h4>
+                  <p>Manage official internship notifications and university notis circulars</p>
                 </div>
                 <button type="button" className="admin-btn-secondary" onClick={addNoticeRow}>
-                  ➕ Add New Circular
+                  ➕ Add Internship / Notis
                 </button>
               </div>
 
@@ -1331,13 +1331,13 @@ export default function AdminEditorModal({
                         className="notice-title-input"
                         value={ntc.title}
                         onChange={(e) => handleNoticeChange(idx, 'title', e.target.value)}
-                        placeholder="Circular Title"
+                        placeholder="Internship / Notis Title"
                       />
                       <button
                         type="button"
                         className="btn-delete-row"
                         onClick={() => removeNoticeRow(idx)}
-                        title="Delete Notice"
+                        title="Delete Internship / Notis"
                       >
                         🗑️
                       </button>
@@ -1376,7 +1376,7 @@ export default function AdminEditorModal({
                         />
                       </div>
                       <div className="form-group full-width">
-                        <label>Circular Body / Description</label>
+                        <label>Internship / Notis Body / Description</label>
                         <textarea
                           rows={2}
                           value={ntc.description}

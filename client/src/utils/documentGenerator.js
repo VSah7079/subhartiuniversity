@@ -431,16 +431,25 @@ export function downloadMarksheet(student, resultData) {
 }
 
 /**
- * 5. Download Official Bonafide / Character Letter
+ * 5. Download Official Bonafide / Character / Internship Letter
  */
 export function downloadOfficialLetter(student, letterType) {
   const isBonafide = letterType === 'bonafide';
-  const title = isBonafide ? 'BONAFIDE STUDENT CERTIFICATE' : 'CHARACTER & CONDUCT CERTIFICATE';
-  const refCode = isBonafide ? 'SVSU/REG/BONA/2026/894' : 'SVSU/REG/CHAR/2026/102';
+  const isInternship = letterType === 'internship';
+  
+  let title = 'CHARACTER & CONDUCT CERTIFICATE';
+  let refCode = 'SVSU/REG/CHAR/2026/102';
+  let bodyText = `This is to certify that <strong>${student.fullName}</strong>, Son/Daughter of <strong>${student.fatherName || 'Shri Rajesh Sharma'}</strong>, having Enrollment No. <strong>${student.enrollmentNo}</strong>, is a student of <strong>${student.course}</strong> at Swami Vivekanand Subharti University Meerut.<br/><br/>To the best of our knowledge and university records, he/she bears an exemplary moral character, disciplined conduct, and has never been involved in any act detrimental to institutional decorum. We wish him/her success in all future pursuits.`;
 
-  const bodyText = isBonafide
-    ? `This is to certify that <strong>${student.fullName}</strong>, S/o <strong>${student.fatherName || 'Shri Rajesh Sharma'}</strong>, bearing University Enrollment Number <strong>${student.enrollmentNo}</strong> and Roll Number <strong>${student.rollNo}</strong>, is a bonafide regular student of this University enrolled in the program <strong>${student.course}</strong> (Semester: <strong>${student.semester}</strong>) under the <strong>${student.department}</strong> for the academic session <strong>${student.academicYear}</strong>.<br/><br/>As per university records, his/her academic progress and disciplinary conduct during the study tenure have been found satisfactory. This certificate is issued upon student's request for official purposes.`
-    : `This is to certify that <strong>${student.fullName}</strong>, Son/Daughter of <strong>${student.fatherName || 'Shri Rajesh Sharma'}</strong>, having Enrollment No. <strong>${student.enrollmentNo}</strong>, is a student of <strong>${student.course}</strong> at Swami Vivekanand Subharti University Meerut.<br/><br/>To the best of our knowledge and university records, he/she bears an exemplary moral character, disciplined conduct, and has never been involved in any act detrimental to institutional decorum. We wish him/her success in all future pursuits.`;
+  if (isBonafide) {
+    title = 'BONAFIDE STUDENT CERTIFICATE';
+    refCode = 'SVSU/REG/BONA/2026/894';
+    bodyText = `This is to certify that <strong>${student.fullName}</strong>, S/o <strong>${student.fatherName || 'Shri Rajesh Sharma'}</strong>, bearing University Enrollment Number <strong>${student.enrollmentNo}</strong> and Roll Number <strong>${student.rollNo}</strong>, is a bonafide regular student of this University enrolled in the program <strong>${student.course}</strong> (Semester: <strong>${student.semester}</strong>) under the <strong>${student.department}</strong> for the academic session <strong>${student.academicYear}</strong>.<br/><br/>As per university records, his/her academic progress and disciplinary conduct during the study tenure have been found satisfactory. This certificate is issued upon student's request for official purposes.`;
+  } else if (isInternship) {
+    title = 'INTERNSHIP RECOMMENDATION & NO OBJECTION CERTIFICATE (NOC)';
+    refCode = 'SVSU/TPO/INTERN/2026/418';
+    bodyText = `This is to certify that <strong>${student.fullName}</strong>, Son/Daughter of <strong>${student.fatherName || 'Shri Rajesh Sharma'}</strong>, bearing Enrollment Number <strong>${student.enrollmentNo}</strong> and Roll Number <strong>${student.rollNo}</strong>, is a bonafide student of <strong>${student.course}</strong> (Semester: <strong>${student.semester}</strong>) in the <strong>${student.department}</strong> at Swami Vivekanand Subharti University, Meerut.<br/><br/>The University has <strong>No Objection</strong> to the student undertaking an industry Internship / Practical Training assignment. The training is recognized as a vital component for academic excellence and corporate exposure.<br/><br/>During his/her tenure at this institution, the student has maintained satisfactory academic standards and exemplary discipline. We strongly recommend him/her for the internship opportunity and wish them grand success in all professional endeavors.`;
+  }
 
   const content = `
     <div>
@@ -452,7 +461,7 @@ export function downloadOfficialLetter(student, letterType) {
             <h1 style="font-size: 22px; color: #0f2137; margin: 0; font-weight: 800;">SWAMI VIVEKANAND SUBHARTI UNIVERSITY</h1>
             <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">(Established under UP Govt. Act 29 of 2008 & Accredited with 'A' Grade by NAAC)</p>
             <p style="font-size: 11px; color: #0f2137; margin: 2px 0 0 0;">Subhartipuram, NH-58, Delhi-Haridwar Bypass Road, Meerut - 250005</p>
-            <p style="font-size: 11px; color: #1d4ed8; font-weight: 700; margin: 2px 0 0 0;">OFFICE OF THE REGISTRAR & STUDENT WELFARE</p>
+            <p style="font-size: 11px; color: #1d4ed8; font-weight: 700; margin: 2px 0 0 0;">OFFICE OF THE REGISTRAR & TRAINING-PLACEMENT CELL</p>
           </div>
         </div>
       </div>
@@ -492,11 +501,12 @@ export function downloadOfficialLetter(student, letterType) {
       </div>
     </div>
   `;
-  triggerPrintWindow(`${isBonafide ? 'Bonafide_Certificate' : 'Character_Certificate'}_${student.enrollmentNo.replace(/[^a-zA-Z0-9]/g, '_')}`, content);
+  const docPrefix = isBonafide ? 'Bonafide_Certificate' : (isInternship ? 'Internship_NOC_Letter' : 'Character_Certificate');
+  triggerPrintWindow(`${docPrefix}_${student.enrollmentNo.replace(/[^a-zA-Z0-9]/g, '_')}`, content);
 }
 
 /**
- * 6. Download Official Notice / Circular Letter
+ * 6. Download Official Internship / Notis Circular Letter
  */
 export function downloadNotice(notice) {
   const content = `
@@ -508,20 +518,20 @@ export function downloadNotice(notice) {
           <div>
             <h1 style="font-size: 20px; color: #0f2137; margin: 0; font-weight: 800;">SWAMI VIVEKANAND SUBHARTI UNIVERSITY</h1>
             <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Subhartipuram, NH-58, Delhi-Haridwar Bypass Road, Meerut - 250005</p>
-            <p style="font-size: 12px; color: #e11d48; font-weight: 800; margin: 2px 0 0 0;">OFFICIAL NOTIFICATION / CIRCULAR</p>
+            <p style="font-size: 12px; color: #e11d48; font-weight: 800; margin: 2px 0 0 0;">OFFICIAL INTERNSHIP & NOTIS CIRCULAR</p>
           </div>
         </div>
       </div>
 
       <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 12px; color: #475569;">
-        <div><strong>Circular Ref:</strong> <span style="color: #e11d48; font-weight: 700;">${notice.refNo}</span></div>
+        <div><strong>Notis Ref:</strong> <span style="color: #e11d48; font-weight: 700;">${notice.refNo}</span></div>
         <div><strong>Date:</strong> ${notice.date}</div>
       </div>
 
       <div style="background: #eff6ff; border-left: 4px solid #2563eb; padding: 12px 16px; margin-bottom: 24px;">
         <h2 style="font-size: 16px; color: #1e3a8a; margin: 0 0 4px 0; font-weight: 800;">${notice.title}</h2>
         <span style="background: #2563eb; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">
-          ${notice.category || 'General'}
+          ${notice.category || 'Internship / General'}
         </span>
       </div>
 
@@ -535,16 +545,16 @@ export function downloadNotice(notice) {
           Copy to:<br/>
           1. Hon'ble Vice Chancellor's Secretariat<br/>
           2. All Deans / Directors / Principals<br/>
-          3. University Web Portal & Student Notice Board
+          3. University Web Portal & Student Internship / Notis Board
         </div>
         <div style="text-align: center;">
           <div style="font-family: cursive; font-size: 13px; color: #1e3a8a; font-weight: 700;">By Order of Competent Authority</div>
           <div style="border-top: 1px solid #64748b; width: 220px; padding-top: 4px; font-size: 11px; font-weight: 700; color: #0f2137;">
-            ${notice.signatory || 'Registrar, SVSU Meerut'}
+            ${notice.signatory || 'Registrar / TPO Head, SVSU Meerut'}
           </div>
         </div>
       </div>
     </div>
   `;
-  triggerPrintWindow(`Notice_${notice.refNo.replace(/[^a-zA-Z0-9]/g, '_')}`, content);
+  triggerPrintWindow(`Notis_${notice.refNo.replace(/[^a-zA-Z0-9]/g, '_')}`, content);
 }
