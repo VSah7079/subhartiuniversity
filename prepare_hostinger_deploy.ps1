@@ -51,10 +51,10 @@ if (Test-Path $ZipFile) {
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::CreateFromDirectory((Resolve-Path $DeployDir).Path, $ZipFile)
 
-$ZipSize = (Get-Item $ZipFile).Length / 1KB
+$ZipSize = (Get-Item $ZipFile).Length / 1024
 $roundedSize = [Math]::Round($ZipSize, 1)
 Write-Host "=======================================================" -ForegroundColor Cyan
 Write-Host "SUCCESS! Hostinger deployment archive created:" -ForegroundColor Green
-Write-Host "   -> File: hostinger_deploy.zip ($roundedSize KB)" -ForegroundColor White
+Write-Host ("   -> File: hostinger_deploy.zip (" + $roundedSize + " KB)") -ForegroundColor White
 Write-Host "   -> Folder: hostinger_deploy/" -ForegroundColor White
 Write-Host "=======================================================" -ForegroundColor Cyan
