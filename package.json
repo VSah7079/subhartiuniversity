@@ -8,11 +8,10 @@
     "server": "node server/server.js",
     "client": "npm --prefix client run dev",
     "dev": "npm --prefix client run dev",
-    "postinstall": "npm --prefix client install",
-    "build": "npm --prefix client install && npm --prefix client run build",
+    "build": "node build.js",
     "seed": "node server/seed.js",
     "prod": "npm run build && node server/server.js",
-    "install:all": "npm install && npm --prefix client install"
+    "install:all": "npm install && cd client && npm install"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
