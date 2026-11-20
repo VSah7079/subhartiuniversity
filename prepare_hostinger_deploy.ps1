@@ -53,8 +53,9 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 $ZipSize = (Get-Item $ZipFile).Length / 1024
 $roundedSize = [Math]::Round($ZipSize, 1)
+$msg = "   -> File: hostinger_deploy.zip ($roundedSize KB)"
 Write-Host "=======================================================" -ForegroundColor Cyan
 Write-Host "SUCCESS! Hostinger deployment archive created:" -ForegroundColor Green
-Write-Host ("   -> File: hostinger_deploy.zip (" + $roundedSize + " KB)") -ForegroundColor White
+Write-Host $msg -ForegroundColor White
 Write-Host "   -> Folder: hostinger_deploy/" -ForegroundColor White
 Write-Host "=======================================================" -ForegroundColor Cyan
