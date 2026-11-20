@@ -2,6 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const compression = require('compression');
+const path = require('path');
+const fs = require('fs');
 const { connectDB, getDbStatus } = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -10,8 +13,12 @@ const { securityHeaders } = require('./middleware/security');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Production Hardening: Disable Express fingerprinting
+// Production Hardening: Disable Express fingerprinting & enable reverse proxy support
 app.disable('x-powered-by');
+app.set('trust proxy', 1);
+
+// Gzip / Deflate payload compression for high performance
+app.use(compression());
 
 // Connect to MongoDB
 connectDB();
@@ -31,9 +38,6 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
 
-const path = require('path');
-const fs = require('fs');
-
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
@@ -48,9 +52,18 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Serve frontend static build if available (single-port production mode)
-const clientDistPath = path.join(__dirname, '../client/dist');
-if (fs.existsSync(clientDistPath)) {
+// Serve frontend static build if available (flexible path resolution for Hostinger / VPS / local)
+const candidateDistPaths = [
+  path.join(__dirname, '../client/dist'),
+  path.join(__dirname, '../dist'),
+  path.join(__dirname, 'dist'),
+  path.join(__dirname, '../../public_html'),
+  path.join(__dirname, '../public_html')
+];
+const clientDistPath = candidateDistPaths.find(p => fs.existsSync(p));
+
+if (clientDistPath) {
+  console.log(`[Static Serving] Serving production frontend from: ${clientDistPath}`);
   // Fingerprinted bundle assets with 1-year immutable caching
   app.use('/assets', express.static(path.join(clientDistPath, 'assets'), {
     maxAge: '1y',

@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'svsu-erp-portal',
-      script: 'server/server.js',
+      script: 'index.js',
       instances: 'max',
       exec_mode: 'cluster',
       autorestart: true,

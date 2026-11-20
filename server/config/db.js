@@ -201,10 +201,19 @@ let isConnected = false;
 
 const connectDB = async () => {
   const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/svsu_erp';
+  
+  // Guard against placeholder strings
+  if (mongoUri.includes('<cluster') || mongoUri.includes('<db_') || mongoUri.includes('<password>')) {
+    console.warn('[MongoDB Notice] Placeholder detected in MONGO_URI. Running in Hybrid/Mock Mode until actual cluster URL is provided.');
+    isConnected = false;
+    return;
+  }
+
+  const isAtlas = mongoUri.startsWith('mongodb+srv://');
   try {
     mongoose.set('strictQuery', false);
     const conn = await mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 2500
+      serverSelectionTimeoutMS: isAtlas ? 8000 : 3000
     });
     isConnected = true;
     console.log(`[MongoDB] Connected successfully: ${conn.connection.host}/${conn.connection.name}`);
@@ -227,7 +236,10 @@ const connectDB = async () => {
     }
   } catch (error) {
     isConnected = false;
-    console.warn(`[MongoDB Warning] Could not connect to local MongoDB (${error.message}).`);
+    console.warn(`[MongoDB Warning] Could not connect to MongoDB (${error.message}).`);
+    if (mongoUri.includes('127.0.0.1') || mongoUri.includes('localhost')) {
+      console.warn(`[MongoDB Tip for Hostinger] Hostinger shared/cloud hosting does not provide a local MongoDB service. Use a free MongoDB Atlas cloud cluster (mongodb+srv://...) by setting MONGO_URI in .env!`);
+    }
     console.warn(`[MongoDB Notice] Server running in Hybrid/Mock Mode. Ready for instant testing with seed students!`);
   }
 };

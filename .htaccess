@@ -1,0 +1,30 @@
+# ==============================================================================
+# Hostinger Root / Passenger Node.js Configuration
+# Swami Vivekanand Subharti University ERP Portal
+# ==============================================================================
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # 1. Force HTTPS
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # 2. Options
+  Options -Indexes
+
+  # 3. If file exists in client/dist, serve directly
+  RewriteCond %{DOCUMENT_ROOT}/client/dist/$1 -f
+  RewriteRule ^(.*)$ client/dist/$1 [L]
+
+  # 4. If file exists in dist, serve directly
+  RewriteCond %{DOCUMENT_ROOT}/dist/$1 -f
+  RewriteRule ^(.*)$ dist/$1 [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
