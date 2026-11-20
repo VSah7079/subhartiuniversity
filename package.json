@@ -1,0 +1,18 @@
+{
+  "name": "svsu-mern-student-portal",
+  "version": "1.0.0",
+  "description": "Swami Vivekanand Subharti University - MERN Stack Student ERP Portal (MongoDB, Express, React, Node.js)",
+  "scripts": {
+    "dev": "npm --prefix client run dev",
+    "server": "npm --prefix server run dev",
+    "client": "npm --prefix client run dev",
+    "seed": "npm --prefix server run seed",
+    "build": "npm --prefix client run build",
+    "start": "npm --prefix server start",
+    "prod": "npm run build && npm --prefix server start",
+    "install:all": "npm --prefix server install && npm --prefix client install"
+  },
+  "keywords": ["mern", "react", "express", "mongodb", "subharti-university", "student-login", "erp"],
+  "author": "Subharti Infotech",
+  "license": "ISC"
+}

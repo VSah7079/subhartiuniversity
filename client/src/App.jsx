@@ -1,0 +1,121 @@
+import React, { useState, useEffect } from 'react';
+import LoginForm from './components/LoginForm.jsx';
+import SwitchUserModal from './components/SwitchUserModal.jsx';
+import StudentDashboard from './components/StudentDashboard.jsx';
+import AdminEditorModal from './components/AdminEditorModal.jsx';
+
+export default function App() {
+  const [student, setStudent] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('svsu_token') || null);
+  const [isSwitchUserOpen, setIsSwitchUserOpen] = useState(false);
+  const [isAdminEditorOpen, setIsAdminEditorOpen] = useState(false);
+  const [toasts, setToasts] = useState([]);
+
+  // Toast Notification helper
+  const showToast = (message, type = 'info') => {
+    const id = Date.now() + Math.random();
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4000);
+  };
+
+  // Restore saved session if present
+  useEffect(() => {
+    const savedStudent = localStorage.getItem('svsu_student_profile');
+    if (savedStudent && token) {
+      try {
+        setStudent(JSON.parse(savedStudent));
+      } catch {
+        localStorage.removeItem('svsu_student_profile');
+      }
+    }
+  }, [token]);
+
+  // Handle successful login
+  const handleLoginSuccess = (data) => {
+    setToken(data.token);
+    setStudent(data.student);
+    localStorage.setItem('svsu_token', data.token);
+    localStorage.setItem('svsu_student_profile', JSON.stringify(data.student));
+  };
+
+  // Handle Logout
+  const handleLogout = () => {
+    setStudent(null);
+    setToken(null);
+    localStorage.removeItem('svsu_token');
+    localStorage.removeItem('svsu_student_profile');
+    showToast('Signed out successfully from Subharti ERP.', 'info');
+  };
+
+  // Handle role selection from Switch User modal
+  const handleSelectRole = (role) => {
+    if (role === 'faculty') {
+      showToast('Faculty & Staff Login Portal: Use employee credentials.', 'info');
+    } else if (role === 'admin') {
+      setIsAdminEditorOpen(true);
+      showToast('ERP Administration & Data Editor opened.', 'info');
+    }
+  };
+
+  // Handle student data updated from Admin Editor
+  const handleStudentUpdated = (updatedStudent) => {
+    // If updated student is the currently logged-in student, sync session state
+    if (!student || student.enrollmentNo.toLowerCase() === updatedStudent.enrollmentNo.toLowerCase()) {
+      setStudent(updatedStudent);
+      localStorage.setItem('svsu_student_profile', JSON.stringify(updatedStudent));
+    }
+  };
+
+  return (
+    <div className={`app-root ${student ? 'app-in-erp' : 'app-in-login'}`}>
+      {student ? (
+        /* Authenticated Full ERP Student Dashboard Suite */
+        <StudentDashboard
+          student={student}
+          onLogout={handleLogout}
+          showToast={showToast}
+          onOpenAdmin={() => setIsAdminEditorOpen(true)}
+        />
+      ) : (
+        /* Exact SVSU Student Login Form matching user's photo */
+        <LoginForm
+          onLoginSuccess={handleLoginSuccess}
+          onSwitchUser={() => setIsSwitchUserOpen(true)}
+          showToast={showToast}
+          onOpenAdmin={() => setIsAdminEditorOpen(true)}
+        />
+      )}
+
+      {/* Switch User Modal */}
+      <SwitchUserModal
+        isOpen={isSwitchUserOpen}
+        onClose={() => setIsSwitchUserOpen(false)}
+        onSelectRole={handleSelectRole}
+      />
+
+      {/* Master ERP Administration & Data Editor Modal */}
+      <AdminEditorModal
+        isOpen={isAdminEditorOpen}
+        onClose={() => setIsAdminEditorOpen(false)}
+        currentStudent={student}
+        onStudentUpdated={handleStudentUpdated}
+        showToast={showToast}
+      />
+
+      {/* Toast Notification Container */}
+      <div className="toast-container">
+        {toasts.map((t) => (
+          <div key={t.id} className={`toast toast-${t.type}`}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span>{t.message}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

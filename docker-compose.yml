@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  svsu-erp:
+    build: .
+    container_name: svsu_erp_app
+    restart: always
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://mongodb:27017/svsu_erp
+      - JWT_SECRET=svsu_super_secure_jwt_secret_key_2026_university_erp
+      - JWT_EXPIRES_IN=7d
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:6-jammy
+    container_name: svsu_erp_mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - svsu_mongodb_data:/data/db
+
+volumes:
+  svsu_mongodb_data:
