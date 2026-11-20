@@ -1,6 +1,8 @@
 node_modules/
-dist/
+/dist/
 build/
 .DS_Store
 *.log
 .env.local
+hostinger_deploy/
+hostinger_deploy.zip
