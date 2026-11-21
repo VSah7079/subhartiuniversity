@@ -212,8 +212,10 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
     showToast(`${label} generated successfully!`, 'success');
   };
 
-  const handleDownloadResult = () => {
-    const currentRes = resultsList.find((r) => r.semester === selectedResultSemester) || resultsList[0];
+  const handleDownloadResult = (targetYear = null) => {
+    const yrStr = targetYear || selectedResultSemester;
+    const currentRes = resultsList.find((r) => r.semester === yrStr) || resultsList[0];
+    if (targetYear) setSelectedResultSemester(currentRes.semester);
     downloadMarksheet(student, currentRes);
     showToast(`Official Marksheet for ${currentRes.semester} generated!`, 'success');
   };
@@ -783,17 +785,26 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                     </button>
                   </div>
 
-                  {/* Semester Marksheet / Grade Card */}
-                  <div className="letter-item-card">
+                  {/* Year 1 to Year 4 Marksheets */}
+                  <div className="letter-item-card" style={{ gridColumn: '1 / -1' }}>
                     <div className="letter-icon">📑</div>
-                    <div className="letter-info">
-                      <h4>Provisional Semester Marksheet</h4>
-                      <p>Full grade transcript showing internal, external, and total grade points for Semester 4.</p>
+                    <div className="letter-info" style={{ flex: 1 }}>
+                      <h4>Official Academic Marksheets (Year 1 • Year 2 • Year 3 • Year 4)</h4>
+                      <p>Download and print authenticated statement of marks and percentage for all 4 academic professional years.</p>
                       <span className="ref-badge">Ref: SVSU/COE/MARKS/2026</span>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+                        {['Year 1', 'Year 2', 'Year 3', 'Year 4'].map((yr) => (
+                          <button
+                            key={yr}
+                            className="letter-download-btn"
+                            onClick={() => handleDownloadResult(yr)}
+                            style={{ padding: '6px 14px', fontSize: '12px' }}
+                          >
+                            <span>⬇</span> Download {yr} Marksheet
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <button className="letter-download-btn" onClick={handleDownloadResult}>
-                      <span>⬇</span> Download Marksheet
-                    </button>
                   </div>
                 </div>
               </div>
@@ -1159,8 +1170,8 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                   <h2>Academic Results & Marksheet Records</h2>
                   <p>Official statement of marks, percentage, and professional exam evaluation</p>
                 </div>
-                <button className="header-action-btn" onClick={handleDownloadResult}>
-                  <span>📑</span> Download {activeResult.semester} Marksheet PDF
+                <button className="header-action-btn" onClick={() => handleDownloadResult(activeResult.semester)}>
+                  <span>📑</span> Download {activeResult.semester} Marksheet
                 </button>
               </div>
 
@@ -1174,6 +1185,34 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                     onClick={() => setSelectedResultSemester(res.semester)}
                   >
                     {res.semester}
+                  </button>
+                ))}
+              </div>
+
+              {/* Year-wise Direct Download Buttons */}
+              <div style={{ display: 'flex', gap: '10px', margin: '14px 0 18px', flexWrap: 'wrap' }}>
+                {['Year 1', 'Year 2', 'Year 3', 'Year 4'].map((yr) => (
+                  <button
+                    key={yr}
+                    type="button"
+                    onClick={() => handleDownloadResult(yr)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '9px 16px',
+                      borderRadius: '6px',
+                      border: '1.5px solid #1e3a8a',
+                      background: selectedResultSemester === yr ? '#1e3a8a' : '#ffffff',
+                      color: selectedResultSemester === yr ? '#ffffff' : '#1e3a8a',
+                      fontWeight: 700,
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <span>⬇</span> Download {yr} Marksheet
                   </button>
                 ))}
               </div>
@@ -1208,8 +1247,8 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                     <h3>{activeResult.semester} Statement of Marks</h3>
                     <p>Examination Session: <strong>{activeResult.examSession}</strong></p>
                   </div>
-                  <button className="secondary-action-btn" onClick={handleDownloadResult}>
-                    <span>⬇</span> Download {activeResult.semester} Marksheet PDF
+                  <button className="secondary-action-btn" onClick={() => handleDownloadResult(activeResult.semester)}>
+                    <span>⬇</span> Download {activeResult.semester} Marksheet
                   </button>
                 </div>
 

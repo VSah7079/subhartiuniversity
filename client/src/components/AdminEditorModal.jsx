@@ -1422,7 +1422,7 @@ export default function AdminEditorModal({
                     onClick={() => downloadMarksheet(formData, currentResult)}
                     title="Download/Preview this Year's Marksheet"
                   >
-                    🖨️ Download {currentResult.semester} Marksheet PDF
+                    🖨️ Download {currentResult.semester} Marksheet
                   </button>
                   <button type="button" className="admin-btn-secondary" onClick={addResultSubject}>
                     ➕ Add Subject Result
