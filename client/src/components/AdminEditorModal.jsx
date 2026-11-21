@@ -70,17 +70,32 @@ export function normalizeResultsForFourYears(results = []) {
       return s.includes(yr.toLowerCase()) || s.includes(`semester ${idx + 1}`) || s === `semester ${idx + 1}` || s.includes(`sem ${idx + 1}`);
     });
     if (existing) {
-      const isCseDummy = existing.subjects && existing.subjects.length > 0 && existing.subjects[0].code && existing.subjects[0].code.startsWith('CSE');
+      const hasSubjects = existing.subjects && existing.subjects.length > 0;
+      const isCseDummy = hasSubjects && existing.subjects[0].code && existing.subjects[0].code.startsWith('CSE');
       return {
         ...DEFAULT_FOUR_YEAR_RESULTS[idx],
         ...existing,
         semester: yr,
-        marks: existing.marks || existing.sgpa || DEFAULT_FOUR_YEAR_RESULTS[idx].marks,
-        percentage: existing.percentage || DEFAULT_FOUR_YEAR_RESULTS[idx].percentage,
-        subjects: isCseDummy ? DEFAULT_FOUR_YEAR_RESULTS[idx].subjects : (existing.subjects && existing.subjects.length > 0 ? existing.subjects : DEFAULT_FOUR_YEAR_RESULTS[idx].subjects)
+        isPublished: existing.isPublished !== undefined ? existing.isPublished : true,
+        marks: existing.marks || existing.sgpa || (hasSubjects ? DEFAULT_FOUR_YEAR_RESULTS[idx].marks : ''),
+        percentage: existing.percentage || (hasSubjects ? DEFAULT_FOUR_YEAR_RESULTS[idx].percentage : ''),
+        subjects: isCseDummy ? DEFAULT_FOUR_YEAR_RESULTS[idx].subjects : (hasSubjects ? existing.subjects : [])
       };
     }
-    return JSON.parse(JSON.stringify(DEFAULT_FOUR_YEAR_RESULTS[idx]));
+    // Brand new unpublished year
+    return {
+      semester: yr,
+      examSession: idx === 0 ? 'June 2017' : idx === 1 ? 'June 2018' : idx === 2 ? 'Dec 2019' : 'Dec 2020',
+      marksObtained: '',
+      totalMarks: '',
+      marks: '',
+      percentage: '',
+      sgpa: '',
+      totalCredits: 20,
+      status: 'PASSED FIRST DIVISION',
+      isPublished: false,
+      subjects: []
+    };
   });
 }
 
@@ -435,7 +450,58 @@ export default function AdminEditorModal({
   // 4. Results & Marks (Supports 4 Academic Years: Year 1 to Year 4)
   const currentResult = (formData?.results && formData.results[selectedResultYearIndex])
     ? formData.results[selectedResultYearIndex]
-    : DEFAULT_FOUR_YEAR_RESULTS[selectedResultYearIndex];
+    : {
+        semester: `Year ${selectedResultYearIndex + 1}`,
+        examSession: selectedResultYearIndex === 0 ? 'June 2017' : selectedResultYearIndex === 1 ? 'June 2018' : selectedResultYearIndex === 2 ? 'Dec 2019' : 'Dec 2020',
+        marksObtained: '',
+        totalMarks: '',
+        marks: '',
+        percentage: '',
+        status: 'PASSED FIRST DIVISION',
+        isPublished: false,
+        subjects: []
+      };
+
+  const togglePublishCurrentYear = () => {
+    const results = normalizeResultsForFourYears(formData.results);
+    const targetYear = results[selectedResultYearIndex];
+    const newStatus = !targetYear.isPublished;
+    targetYear.isPublished = newStatus;
+    // If turning ON and subjects are empty, load standard template
+    if (newStatus && (!targetYear.subjects || targetYear.subjects.length === 0)) {
+      targetYear.subjects = JSON.parse(JSON.stringify(DEFAULT_FOUR_YEAR_RESULTS[selectedResultYearIndex].subjects));
+      const totalObt = targetYear.subjects.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+      const maxPossible = targetYear.subjects.length * 100;
+      targetYear.marksObtained = totalObt;
+      targetYear.totalMarks = maxPossible;
+      targetYear.marks = `${totalObt}/${maxPossible}`;
+      targetYear.percentage = `${((totalObt / maxPossible) * 100).toFixed(2)}%`;
+      targetYear.sgpa = `${totalObt}/${maxPossible}`;
+    }
+    setFormData((prev) => ({ ...prev, results }));
+    showToast(
+      newStatus
+        ? `✔ ${targetYear.semester} Marksheet is now Published and available for Student Download!`
+        : `🔒 ${targetYear.semester} Marksheet is now Unpublished (Hidden from student).`,
+      newStatus ? 'success' : 'info'
+    );
+  };
+
+  const loadStandardMbbsSubjects = () => {
+    const results = normalizeResultsForFourYears(formData.results);
+    const targetYear = results[selectedResultYearIndex];
+    targetYear.subjects = JSON.parse(JSON.stringify(DEFAULT_FOUR_YEAR_RESULTS[selectedResultYearIndex].subjects));
+    const totalObt = targetYear.subjects.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+    const maxPossible = targetYear.subjects.length * 100;
+    targetYear.marksObtained = totalObt;
+    targetYear.totalMarks = maxPossible;
+    targetYear.marks = `${totalObt}/${maxPossible}`;
+    targetYear.percentage = `${((totalObt / maxPossible) * 100).toFixed(2)}%`;
+    targetYear.sgpa = `${totalObt}/${maxPossible}`;
+    targetYear.isPublished = true;
+    setFormData((prev) => ({ ...prev, results }));
+    showToast(`Standard MBBS subjects loaded & published for ${targetYear.semester}!`, 'success');
+  };
 
   const handleResultMetaChange = (field, value) => {
     const results = normalizeResultsForFourYears(formData.results);
@@ -483,6 +549,7 @@ export default function AdminEditorModal({
   const addResultSubject = () => {
     const results = normalizeResultsForFourYears(formData.results);
     const targetYear = results[selectedResultYearIndex];
+    if (!targetYear.subjects) targetYear.subjects = [];
     targetYear.subjects.push({
       code: `MBBS-${targetYear.subjects.length + 1}`,
       name: 'CLINICAL PRACTICAL / ELECTIVE',
@@ -501,6 +568,7 @@ export default function AdminEditorModal({
     targetYear.marks = `${totalObt}/${maxPossible}`;
     targetYear.percentage = `${((totalObt / maxPossible) * 100).toFixed(2)}%`;
     targetYear.sgpa = `${totalObt}/${maxPossible}`;
+    targetYear.isPublished = true;
     setFormData((prev) => ({ ...prev, results }));
   };
 
@@ -1506,6 +1574,72 @@ export default function AdminEditorModal({
                 ))}
               </div>
 
+              {/* Publish Status & Quick Actions Banner */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: currentResult.isPublished ? '#f0fdf4' : '#fff7ed',
+                border: currentResult.isPublished ? '1.5px solid #86efac' : '1.5px solid #fed7aa',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                marginBottom: '16px',
+                flexWrap: 'wrap',
+                gap: '12px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '22px' }}>{currentResult.isPublished ? '✅' : '🔒'}</span>
+                  <div>
+                    <div style={{ fontSize: '13.5px', fontWeight: 800, color: currentResult.isPublished ? '#15803d' : '#9a3412' }}>
+                      Student Download Status: {currentResult.isPublished ? `PUBLISHED (Student can view & download ${currentResult.semester})` : `UNPUBLISHED (Download locked for Student)`}
+                    </div>
+                    <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '2px' }}>
+                      {currentResult.isPublished
+                        ? `The student portal will display these marks and allow downloading the official ${currentResult.semester} marksheet PDF.`
+                        : `The student portal will display "Awaiting University Release" and marksheet download will be completely locked.`}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={togglePublishCurrentYear}
+                    style={{
+                      padding: '7px 15px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: currentResult.isPublished ? '#dc2626' : '#16a34a',
+                      color: '#ffffff',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    {currentResult.isPublished ? '🔒 Hide / Unpublish for Student' : '✅ Publish Marksheet for Student'}
+                  </button>
+                  {(!currentResult.subjects || currentResult.subjects.length === 0) && (
+                    <button
+                      type="button"
+                      onClick={loadStandardMbbsSubjects}
+                      style={{
+                        padding: '7px 14px',
+                        borderRadius: '6px',
+                        border: '1px solid #1e3a8a',
+                        background: '#ffffff',
+                        color: '#1e3a8a',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      📋 Pre-fill MBBS Template
+                    </button>
+                  )}
+                </div>
+              </div>
+
               {currentResult && (
                 <div className="admin-form-grid" style={{ marginBottom: '18px', background: '#f8fafc', padding: '14px', borderRadius: '8px' }}>
                   <div className="form-group">
@@ -1578,91 +1712,107 @@ export default function AdminEditorModal({
                 </div>
               )}
 
-              <div className="table-responsive">
-                <table className="admin-editor-table">
-                  <thead>
-                    <tr>
-                      <th>Subject Code</th>
-                      <th>Subject Title</th>
-                      <th style={{ width: '80px' }}>Internal (30)</th>
-                      <th style={{ width: '80px' }}>External (70)</th>
-                      <th style={{ width: '70px' }}>Total (100)</th>
-                      <th style={{ width: '70px' }}>Grade</th>
-                      <th style={{ width: '70px' }}>Max Marks</th>
-                      <th style={{ width: '50px' }}>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(currentResult && currentResult.subjects ? currentResult.subjects : []).map((sub, idx) => (
-                      <tr key={idx}>
-                        <td>
-                          <input
-                            type="text"
-                            value={sub.code}
-                            onChange={(e) => handleResultSubjectChange(idx, 'code', e.target.value)}
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={sub.name}
-                            onChange={(e) => handleResultSubjectChange(idx, 'name', e.target.value)}
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            min="0"
-                            max="30"
-                            value={sub.internal}
-                            onChange={(e) => handleResultSubjectChange(idx, 'internal', e.target.value)}
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            min="0"
-                            max="70"
-                            value={sub.external}
-                            onChange={(e) => handleResultSubjectChange(idx, 'external', e.target.value)}
-                          />
-                        </td>
-                        <td>
-                          <strong>{sub.total}</strong>
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={sub.grade}
-                            onChange={(e) => handleResultSubjectChange(idx, 'grade', e.target.value)}
-                            style={{ textAlign: 'center', fontWeight: 'bold' }}
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            min="10"
-                            max="200"
-                            value={sub.maxMarks || 100}
-                            onChange={(e) => handleResultSubjectChange(idx, 'maxMarks', e.target.value)}
-                            style={{ textAlign: 'center' }}
-                          />
-                        </td>
-                        <td>
-                          <button
-                            type="button"
-                            className="btn-delete-row"
-                            onClick={() => removeResultSubject(idx)}
-                            title="Delete subject mark"
-                          >
-                            🗑️
-                          </button>
-                        </td>
+              {(!currentResult.subjects || currentResult.subjects.length === 0) ? (
+                <div style={{ padding: '36px 20px', textAlign: 'center', background: '#f8fafc', border: '1.5px dashed #cbd5e1', borderRadius: '8px', marginBottom: '16px' }}>
+                  <p style={{ margin: '0 0 12px 0', fontSize: '13.5px', color: '#64748b' }}>
+                    No subject marks entered for <strong>{currentResult.semester}</strong> yet (Unpublished).
+                  </p>
+                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <button type="button" className="admin-btn-secondary" onClick={loadStandardMbbsSubjects}>
+                      📋 Pre-fill Standard MBBS Template
+                    </button>
+                    <button type="button" className="admin-btn-secondary" onClick={addResultSubject}>
+                      ➕ Add Individual Subject
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="admin-editor-table">
+                    <thead>
+                      <tr>
+                        <th>Subject Code</th>
+                        <th>Subject Title</th>
+                        <th style={{ width: '80px' }}>Internal (30)</th>
+                        <th style={{ width: '80px' }}>External (70)</th>
+                        <th style={{ width: '70px' }}>Total (100)</th>
+                        <th style={{ width: '70px' }}>Grade</th>
+                        <th style={{ width: '70px' }}>Max Marks</th>
+                        <th style={{ width: '50px' }}>Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {currentResult.subjects.map((sub, idx) => (
+                        <tr key={idx}>
+                          <td>
+                            <input
+                              type="text"
+                              value={sub.code}
+                              onChange={(e) => handleResultSubjectChange(idx, 'code', e.target.value)}
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              value={sub.name}
+                              onChange={(e) => handleResultSubjectChange(idx, 'name', e.target.value)}
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              min="0"
+                              max="30"
+                              value={sub.internal}
+                              onChange={(e) => handleResultSubjectChange(idx, 'internal', e.target.value)}
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              min="0"
+                              max="70"
+                              value={sub.external}
+                              onChange={(e) => handleResultSubjectChange(idx, 'external', e.target.value)}
+                            />
+                          </td>
+                          <td>
+                            <strong>{sub.total}</strong>
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              value={sub.grade}
+                              onChange={(e) => handleResultSubjectChange(idx, 'grade', e.target.value)}
+                              style={{ textAlign: 'center', fontWeight: 'bold' }}
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              min="10"
+                              max="200"
+                              value={sub.maxMarks || 100}
+                              onChange={(e) => handleResultSubjectChange(idx, 'maxMarks', e.target.value)}
+                              style={{ textAlign: 'center' }}
+                            />
+                          </td>
+                          <td>
+                            <button
+                              type="button"
+                              className="btn-delete-row"
+                              onClick={() => removeResultSubject(idx)}
+                              title="Delete subject mark"
+                            >
+                              🗑️
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 

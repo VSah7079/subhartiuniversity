@@ -411,6 +411,10 @@ export function downloadAdmitCard(student, yearFilter = null) {
  * 4. Download / Print Semester Marksheet / Grade Card
  */
 export function downloadMarksheet(student, resultData) {
+  if (!resultData || resultData.isUploaded === false || !resultData.subjects || resultData.subjects.length === 0) {
+    alert(`The marksheet for ${resultData?.semester || 'this academic year'} has not been published or uploaded by the university administration yet.`);
+    return;
+  }
   const rows = (resultData.subjects || []).map((sub, i) => `
     <tr>
       <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${i + 1}</td>

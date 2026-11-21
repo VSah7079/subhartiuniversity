@@ -71,7 +71,7 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
 
   // Dynamic Fee Calculations from transaction ledger or student overrides
   const calculatedTotalPaid = feeTransactions.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
-  const totalFeePaid = (student.totalFeePaid && Number(student.totalFeePaid) !== 320000)
+  const totalFeePaid = (student.totalFeePaid && Number(student.totalFeePaid) !== 320000 && Number(student.totalFeePaid) > 0)
     ? Number(student.totalFeePaid)
     : (calculatedTotalPaid > 0 ? calculatedTotalPaid : (Number(student.totalFeePaid) || 320000));
 
@@ -81,7 +81,7 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
     return semStr.includes(`semester ${stuSem}`) || semStr.includes(`sem ${stuSem}`) || semStr === stuSem;
   }) || feeTransactions[0];
 
-  const currentSemesterFee = (student.currentSemesterFee && Number(student.currentSemesterFee) !== 62500)
+  const currentSemesterFee = (student.currentSemesterFee && Number(student.currentSemesterFee) !== 62500 && Number(student.currentSemesterFee) > 0)
     ? Number(student.currentSemesterFee)
     : (currentSemMatch ? Number(currentSemMatch.amount) || 0 : (feeTransactions[0] ? Number(feeTransactions[0].amount) || 0 : 0));
 
@@ -170,24 +170,47 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
   ];
 
   // Merge student's custom saved results with Year 1, Year 2, Year 3, Year 4
+  // CRITICAL REQUIREMENT: Students can ONLY download if the admin has actually uploaded/published that year's marksheet
   const rawResults = (student.results && student.results.length > 0) ? student.results : [];
   const resultsList = ['Year 1', 'Year 2', 'Year 3', 'Year 4'].map((yr, idx) => {
     const existing = rawResults.find((r) => {
       const s = String(r.semester || '').toLowerCase();
       return s.includes(yr.toLowerCase()) || s.includes(`semester ${idx + 1}`) || s === `semester ${idx + 1}` || s.includes(`sem ${idx + 1}`);
     });
-    if (existing) {
-      const isCseDummy = existing.subjects && existing.subjects.length > 0 && existing.subjects[0].code && existing.subjects[0].code.startsWith('CSE');
+
+    const hasSubjects = existing && Array.isArray(existing.subjects) && existing.subjects.length > 0;
+    const hasExplicitMarks = existing && (existing.marks || existing.marksObtained);
+    const isExplicitlyPublished = existing ? existing.isPublished !== false : false;
+    const isUploaded = !!(existing && isExplicitlyPublished && (hasSubjects || hasExplicitMarks));
+
+    if (isUploaded) {
+      const isCseDummy = hasSubjects && existing.subjects[0].code && existing.subjects[0].code.startsWith('CSE');
       return {
         ...defaultFourYearResults[idx],
         ...existing,
         semester: yr,
+        isUploaded: true,
+        examSession: existing.examSession || defaultFourYearResults[idx].examSession,
+        marksObtained: existing.marksObtained || (existing.marks ? String(existing.marks).split('/')[0] : defaultFourYearResults[idx].marksObtained),
+        totalMarks: existing.totalMarks || (existing.marks && String(existing.marks).includes('/') ? String(existing.marks).split('/')[1] : defaultFourYearResults[idx].totalMarks),
         marks: existing.marks || existing.sgpa || defaultFourYearResults[idx].marks,
         percentage: existing.percentage || defaultFourYearResults[idx].percentage,
-        subjects: isCseDummy ? defaultFourYearResults[idx].subjects : (existing.subjects && existing.subjects.length > 0 ? existing.subjects : defaultFourYearResults[idx].subjects)
+        status: existing.status || defaultFourYearResults[idx].status,
+        subjects: isCseDummy ? defaultFourYearResults[idx].subjects : (hasSubjects ? existing.subjects : defaultFourYearResults[idx].subjects)
       };
     }
-    return defaultFourYearResults[idx];
+
+    return {
+      semester: yr,
+      isUploaded: false,
+      examSession: existing?.examSession || (idx === 0 ? 'June 2017' : idx === 1 ? 'June 2018' : idx === 2 ? 'Dec 2019' : 'Dec 2020'),
+      marksObtained: '—',
+      totalMarks: '—',
+      marks: 'Pending',
+      percentage: 'Pending',
+      status: 'AWAITING UNIVERSITY RELEASE',
+      subjects: []
+    };
   });
 
   const noticesList = (student.notices && student.notices.length > 0) ? student.notices : [
@@ -250,6 +273,10 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
     const yrStr = targetYear || selectedResultSemester;
     const currentRes = resultsList.find((r) => r.semester === yrStr) || resultsList[0];
     if (targetYear) setSelectedResultSemester(currentRes.semester);
+    if (!currentRes || !currentRes.isUploaded) {
+      showToast(`🔒 ${yrStr} marksheet has not been uploaded by admin yet. Download not available.`, 'error');
+      return;
+    }
     downloadMarksheet(student, currentRes);
     showToast(`Official Marksheet for ${currentRes.semester} generated!`, 'success');
   };
@@ -842,16 +869,34 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                       <p>Download and print authenticated statement of marks and percentage for all 4 academic professional years.</p>
                       <span className="ref-badge">Ref: SVSU/COE/MARKS/2026</span>
                       <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
-                        {['Year 1', 'Year 2', 'Year 3', 'Year 4'].map((yr) => (
-                          <button
-                            key={yr}
-                            className="letter-download-btn"
-                            onClick={() => handleDownloadResult(yr)}
-                            style={{ padding: '6px 14px', fontSize: '12px' }}
-                          >
-                            <span>⬇</span> Download {yr} Marksheet
-                          </button>
-                        ))}
+                        {resultsList.map((res) => {
+                          const isUp = res.isUploaded;
+                          return (
+                            <button
+                              key={res.semester}
+                              className="letter-download-btn"
+                              onClick={() => {
+                                if (!isUp) {
+                                  showToast(`🔒 ${res.semester} marksheet has not been uploaded by admin yet.`, 'error');
+                                  return;
+                                }
+                                handleDownloadResult(res.semester);
+                              }}
+                              style={{
+                                padding: '6px 14px',
+                                fontSize: '12px',
+                                background: isUp ? '#1e3a8a' : '#f1f5f9',
+                                color: isUp ? '#ffffff' : '#64748b',
+                                border: isUp ? 'none' : '1px dashed #cbd5e1',
+                                cursor: isUp ? 'pointer' : 'not-allowed',
+                                opacity: isUp ? 1 : 0.75
+                              }}
+                              title={isUp ? `Download ${res.semester} Marksheet` : `${res.semester} marksheet awaiting admin upload`}
+                            >
+                              <span>{isUp ? '⬇' : '🔒'}</span> Download {res.semester} Marksheet {isUp ? '' : '(Awaiting Upload)'}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -883,7 +928,7 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                 <div className="fee-metric-card">
                   <span className="metric-label">Total Program Fee Paid</span>
                   <div className="metric-val">₹ {totalFeePaid.toLocaleString('en-IN')}.00</div>
-                  <span className="metric-sub">Across {feeTransactions.length} Semesters</span>
+                  <span className="metric-sub">Across {feeTransactions.length} Verified Receipts / Records</span>
                 </div>
 
                 <div className="fee-metric-card">
@@ -1219,8 +1264,19 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                   <h2>Academic Results & Marksheet Records</h2>
                   <p>Official statement of marks, percentage, and professional exam evaluation</p>
                 </div>
-                <button className="header-action-btn" onClick={() => handleDownloadResult(activeResult.semester)}>
-                  <span>📑</span> Download {activeResult.semester} Marksheet
+                <button
+                  className={`header-action-btn ${!activeResult.isUploaded ? 'disabled' : ''}`}
+                  onClick={() => {
+                    if (!activeResult.isUploaded) {
+                      showToast(`🔒 ${activeResult.semester} marksheet has not been uploaded by admin yet.`, 'error');
+                      return;
+                    }
+                    handleDownloadResult(activeResult.semester);
+                  }}
+                  style={!activeResult.isUploaded ? { background: '#94a3b8', cursor: 'not-allowed', opacity: 0.8 } : {}}
+                  title={activeResult.isUploaded ? `Download ${activeResult.semester} Marksheet` : `${activeResult.semester} marksheet is awaiting admin upload`}
+                >
+                  <span>{activeResult.isUploaded ? '📑' : '🔒'}</span> {activeResult.isUploaded ? `Download ${activeResult.semester} Marksheet` : 'Download Not Available (Awaiting Admin Upload)'}
                 </button>
               </div>
 
@@ -1233,73 +1289,102 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                     className={`sem-select-pill ${selectedResultSemester === res.semester ? 'active' : ''}`}
                     onClick={() => setSelectedResultSemester(res.semester)}
                   >
-                    {res.semester}
+                    {res.semester} {!res.isUploaded && '⏳'}
                   </button>
                 ))}
               </div>
 
               {/* Year-wise Direct Download Buttons */}
               <div style={{ display: 'flex', gap: '10px', margin: '14px 0 18px', flexWrap: 'wrap' }}>
-                {['Year 1', 'Year 2', 'Year 3', 'Year 4'].map((yr) => (
-                  <button
-                    key={yr}
-                    type="button"
-                    onClick={() => handleDownloadResult(yr)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '9px 16px',
-                      borderRadius: '6px',
-                      border: '1.5px solid #1e3a8a',
-                      background: selectedResultSemester === yr ? '#1e3a8a' : '#ffffff',
-                      color: selectedResultSemester === yr ? '#ffffff' : '#1e3a8a',
-                      fontWeight: 700,
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    <span>⬇</span> Download {yr} Marksheet
-                  </button>
-                ))}
+                {resultsList.map((res) => {
+                  const isUp = res.isUploaded;
+                  const isSel = selectedResultSemester === res.semester;
+                  return (
+                    <button
+                      key={res.semester}
+                      type="button"
+                      onClick={() => {
+                        setSelectedResultSemester(res.semester);
+                        if (!isUp) {
+                          showToast(`🔒 ${res.semester} marksheet has not been uploaded by admin yet. Download not available.`, 'error');
+                          return;
+                        }
+                        handleDownloadResult(res.semester);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '9px 16px',
+                        borderRadius: '6px',
+                        border: isUp ? '1.5px solid #1e3a8a' : '1.5px dashed #cbd5e1',
+                        background: !isUp ? (isSel ? '#e2e8f0' : '#f8fafc') : (isSel ? '#1e3a8a' : '#ffffff'),
+                        color: !isUp ? '#64748b' : (isSel ? '#ffffff' : '#1e3a8a'),
+                        fontWeight: 700,
+                        fontSize: '13px',
+                        cursor: isUp ? 'pointer' : 'not-allowed',
+                        boxShadow: isUp ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
+                        transition: 'all 0.2s',
+                        opacity: isUp ? 1 : 0.8
+                      }}
+                      title={isUp ? `Download ${res.semester} Marksheet` : `${res.semester} marksheet awaiting admin upload`}
+                    >
+                      <span>{isUp ? '⬇' : '🔒'}</span> Download {res.semester} Marksheet {isUp ? '' : '(Awaiting Upload)'}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Result Summary Bar */}
               <div className="result-kpi-banner">
                 <div className="res-kpi-item">
                   <span className="res-kpi-label">Marks Obtained</span>
-                  <div className="res-kpi-value">{activeResult.marksObtained || (activeResult.marks ? String(activeResult.marks).split('/')[0] : '450')}</div>
+                  <div className="res-kpi-value">{activeResult.marksObtained}</div>
                 </div>
 
                 <div className="res-kpi-item">
                   <span className="res-kpi-label">Percentage (%)</span>
-                  <div className="res-kpi-value gold-text">{activeResult.percentage || (student.cgpa ? `${student.cgpa}%` : '66.73%')}</div>
+                  <div className={`res-kpi-value ${activeResult.isUploaded ? 'gold-text' : 'text-muted'}`}>{activeResult.percentage}</div>
                 </div>
 
                 <div className="res-kpi-item">
                   <span className="res-kpi-label">Total Marks</span>
-                  <div className="res-kpi-value">{activeResult.totalMarks || (activeResult.marks && String(activeResult.marks).includes('/') ? String(activeResult.marks).split('/')[1] : '600')}</div>
+                  <div className="res-kpi-value">{activeResult.totalMarks}</div>
                 </div>
 
                 <div className="res-kpi-item result-status-col">
                   <span className="res-kpi-label">Final Evaluation</span>
-                  <div className="res-status-badge">{activeResult.status || 'PASSED FIRST DIVISION'}</div>
+                  <div className={`res-status-badge ${!activeResult.isUploaded ? 'status-awaiting' : ''}`} style={!activeResult.isUploaded ? { background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' } : {}}>
+                    {activeResult.status}
+                  </div>
                 </div>
               </div>
 
-              {/* Marksheet Subject Table */}
-              <div className="marksheet-card">
-                <div className="table-header-flex">
-                  <div>
-                    <h3>{activeResult.semester} Statement of Marks</h3>
-                    <p>Examination Session: <strong>{activeResult.examSession}</strong></p>
+              {/* Marksheet Subject Table OR Awaiting Declaration Notice */}
+              {!activeResult.isUploaded ? (
+                <div className="marksheet-card" style={{ padding: '42px 24px', textAlign: 'center', background: '#f8fafc', border: '2px dashed #cbd5e1', borderRadius: '12px', margin: '20px 0' }}>
+                  <div style={{ fontSize: '48px', marginBottom: '12px' }}>⏳</div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f2137', margin: '0 0 8px 0' }}>
+                    {activeResult.semester} Statement of Marks Not Uploaded Yet
+                  </h3>
+                  <p style={{ fontSize: '13.5px', color: '#64748b', maxWidth: '540px', margin: '0 auto 18px', lineHeight: 1.6 }}>
+                    The official marksheet and evaluated subject ledger for <strong>{activeResult.semester}</strong> have not been uploaded or released by the University Administration for candidate <strong>{student.fullName}</strong>.
+                  </p>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', padding: '9px 18px', borderRadius: '6px', fontSize: '12.5px', fontWeight: 700 }}>
+                    <span>🔒</span> Marksheet download will automatically become available once the Controller of Examinations uploads and publishes the marks for {activeResult.semester}.
                   </div>
-                  <button className="secondary-action-btn" onClick={() => handleDownloadResult(activeResult.semester)}>
-                    <span>⬇</span> Download {activeResult.semester} Marksheet
-                  </button>
                 </div>
+              ) : (
+                <div className="marksheet-card">
+                  <div className="table-header-flex">
+                    <div>
+                      <h3>{activeResult.semester} Statement of Marks</h3>
+                      <p>Examination Session: <strong>{activeResult.examSession}</strong></p>
+                    </div>
+                    <button className="secondary-action-btn" onClick={() => handleDownloadResult(activeResult.semester)}>
+                      <span>⬇</span> Download {activeResult.semester} Marksheet
+                    </button>
+                  </div>
 
                 {/* Marksheet Student Info & Passport Photo Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '8px', padding: '14px 18px', margin: '14px 0 18px', flexWrap: 'wrap', gap: '14px' }}>
@@ -1384,6 +1469,7 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                   </div>
                 </div>
               </div>
+              )}
             </div>
           )}
 
