@@ -127,13 +127,6 @@ export default function LoginForm({ onLoginSuccess, onSwitchUser, showToast }) {
     }
   };
 
-  // Quick fill helper for testing
-  const fillDemo = (id, birthDate) => {
-    setIdentifier(id);
-    setDob(birthDate);
-    setErrorMessage('');
-  };
-
   return (
     <div className="same-login-page-wrapper">
       {/* Exact Card matching the Photo */}
@@ -244,18 +237,6 @@ export default function LoginForm({ onLoginSuccess, onSwitchUser, showToast }) {
             </button>
           </div>
         </form>
-
-        {/* Quick Demo Helper Links (Discrete for Testing) */}
-        <div className="same-demo-links">
-          <span>Demo:</span>
-          <button type="button" onClick={() => fillDemo('SVSU/2023/10892', '15/08/2002')}>
-            Student 1 (15/08/2002)
-          </button>
-          <span>|</span>
-          <button type="button" onClick={() => fillDemo('SVSU/2023/10893', '22/04/2003')}>
-            Student 2 (22/04/2003)
-          </button>
-        </div>
       </div>
 
       {/* Copyright Badge below card matching photo */}

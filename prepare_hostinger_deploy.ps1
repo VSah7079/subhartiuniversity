@@ -1,4 +1,4 @@
-$ProgressPreference = 'SilentlyContinue'
+﻿$ProgressPreference = 'SilentlyContinue'
 
 Write-Host "=======================================================" -ForegroundColor Cyan
 Write-Host "📦 Packaging SVSU ERP Portal for Hostinger Production..." -ForegroundColor Green
@@ -54,9 +54,9 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 $ZipSize = (Get-Item $ZipFile).Length / 1024
 $roundedSize = [Math]::Round($ZipSize, 1)
 $msg = '   -> File: hostinger_deploy.zip (' + $roundedSize + ' KB)'
-Write-Host "=======================================================" -ForegroundColor "Cyan"
-Write-Host "SUCCESS: Hostinger deployment archive created:" -ForegroundColor "Green"
-Write-Host $msg -ForegroundColor "White"
-Write-Host "   -> Folder: hostinger_deploy/" -ForegroundColor "White"
-Write-Host "=======================================================" -ForegroundColor "Cyan"
+Write-Host "======================================================="
+Write-Host "SUCCESS: Hostinger deployment archive created:"
+Write-Host $msg
+Write-Host "   -> Folder: hostinger_deploy/"
+Write-Host "======================================================="
 

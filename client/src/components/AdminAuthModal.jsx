@@ -1,19 +1,13 @@
 import React, { useState } from 'react';
 
 export default function AdminAuthModal({ isOpen, onClose, onSuccess, showToast }) {
-  const [username, setUsername] = useState('svsu_admin');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   if (!isOpen) return null;
-
-  const handleFillDemo = (user, pass) => {
-    setUsername(user);
-    setPassword(pass);
-    setErrorMsg('');
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -201,47 +195,6 @@ export default function AdminAuthModal({ isOpen, onClose, onSuccess, showToast }
                 title={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? '👁️' : '🔒'}
-              </button>
-            </div>
-          </div>
-
-          {/* Quick Demo Credentials for Testing */}
-          <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '10px 12px', marginBottom: '18px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#1e40af', display: 'block', marginBottom: '6px' }}>
-              🔑 Official Admin Credentials (Click to Autofill):
-            </span>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                onClick={() => handleFillDemo('svsu_admin', 'admin@svsu2026')}
-                style={{
-                  padding: '4px 10px',
-                  fontSize: '11px',
-                  borderRadius: '4px',
-                  border: '1px solid #93c5fd',
-                  background: '#ffffff',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  color: '#1d4ed8'
-                }}
-              >
-                👤 Super Admin (admin@svsu2026)
-              </button>
-              <button
-                type="button"
-                onClick={() => handleFillDemo('admin', 'admin123')}
-                style={{
-                  padding: '4px 10px',
-                  fontSize: '11px',
-                  borderRadius: '4px',
-                  border: '1px solid #93c5fd',
-                  background: '#ffffff',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  color: '#1d4ed8'
-                }}
-              >
-                👤 Controller (admin123)
               </button>
             </div>
           </div>
