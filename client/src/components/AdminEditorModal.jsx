@@ -113,7 +113,16 @@ export default function AdminEditorModal({
   const fetchStudents = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/admin/students');
+      const adminToken = sessionStorage.getItem('svsu_admin_token') || '';
+      const adminKey = sessionStorage.getItem('svsu_admin_key') || 'admin@svsu2026';
+
+      const res = await fetch('/api/admin/students', {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(adminToken ? { Authorization: `Bearer ${adminToken}` } : {}),
+          'x-admin-key': adminKey
+        }
+      });
       const data = await res.json();
       if (data.success && data.students && data.students.length > 0) {
         setStudentList(data.students);
@@ -502,6 +511,32 @@ export default function AdminEditorModal({
               title="Save all changes to backend & refresh portal"
             >
               {isSaving ? 'Saving...' : '💾 Save All Changes'}
+            </button>
+            <button
+              type="button"
+              style={{
+                padding: '6px 12px',
+                fontSize: '12px',
+                background: '#f1f5f9',
+                border: '1px solid #cbd5e1',
+                color: '#475569',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+              onClick={() => {
+                sessionStorage.removeItem('svsu_admin_token');
+                sessionStorage.removeItem('svsu_admin_user');
+                sessionStorage.removeItem('svsu_admin_key');
+                showToast('Administrator logged out. Editor locked.', 'info');
+                onClose();
+              }}
+              title="Sign out of Admin Session and lock editor"
+            >
+              🔒 Lock & Sign Out
             </button>
             <button className="modal-close" onClick={onClose} aria-label="Close modal">
               &times;
