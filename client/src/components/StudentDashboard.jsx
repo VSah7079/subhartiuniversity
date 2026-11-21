@@ -36,6 +36,28 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
     { receiptNo: 'REC/2025/0811', date: '22 July 2025', semester: 'Semester 3', amount: 60000, mode: 'Online Netbanking (SBI)', status: 'Cleared', purpose: 'Tuition & Lab Fee' }
   ];
 
+  // Dynamic Fee Calculations from transaction ledger or student overrides
+  const calculatedTotalPaid = feeTransactions.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+  const totalFeePaid = (student.totalFeePaid !== undefined && student.totalFeePaid !== null && student.totalFeePaid !== '')
+    ? Number(student.totalFeePaid)
+    : calculatedTotalPaid;
+
+  const currentSemMatch = feeTransactions.find((t) => {
+    const semStr = String(t.semester || '').toLowerCase();
+    const stuSem = String(student.semester || '').toLowerCase();
+    return semStr.includes(`semester ${stuSem}`) || semStr.includes(`sem ${stuSem}`) || semStr === stuSem;
+  }) || feeTransactions[0];
+
+  const currentSemesterFee = (student.currentSemesterFee !== undefined && student.currentSemesterFee !== null && student.currentSemesterFee !== '')
+    ? Number(student.currentSemesterFee)
+    : (currentSemMatch ? Number(currentSemMatch.amount) || 0 : 0);
+
+  const outstandingBalance = (student.outstandingBalance !== undefined && student.outstandingBalance !== null && student.outstandingBalance !== '')
+    ? Number(student.outstandingBalance)
+    : 0;
+
+  const isFeeCleared = (student.feeStatus || 'Cleared').toLowerCase() === 'cleared' && outstandingBalance === 0;
+
   const examSchedule = (student.examSchedule && student.examSchedule.length > 0) ? student.examSchedule : [
     { date: '02 Dec 2026', time: '10:00 AM - 01:00 PM', subjectCode: 'CSE-501', subjectName: 'Database Management Systems', room: 'Hall B-204, FET Block', status: 'Upcoming' },
     { date: '05 Dec 2026', time: '10:00 AM - 01:00 PM', subjectCode: 'CSE-502', subjectName: 'Design & Analysis of Algorithms', room: 'Hall B-204, FET Block', status: 'Upcoming' },
@@ -335,11 +357,15 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                     <span>Fee Clearance</span>
                     <span className="kpi-icon">💳</span>
                   </div>
-                  <div className="kpi-value status-cleared">NO DUES</div>
-                  <div className="progress-bar-shell">
-                    <div className="progress-bar-fill green-fill" style={{ width: '100%' }}></div>
+                  <div className={`kpi-value ${isFeeCleared ? 'status-cleared' : 'status-due'}`}>
+                    {isFeeCleared ? 'NO DUES' : `DUE: ₹ ${outstandingBalance.toLocaleString('en-IN')}`}
                   </div>
-                  <span className="kpi-note green-note">All dues paid for Semester {student.semester}</span>
+                  <div className="progress-bar-shell">
+                    <div className={`progress-bar-fill ${isFeeCleared ? 'green-fill' : 'orange-fill'}`} style={{ width: '100%' }}></div>
+                  </div>
+                  <span className={`kpi-note ${isFeeCleared ? 'green-note' : 'orange-note'}`}>
+                    {isFeeCleared ? `All dues paid for Semester ${student.semester || 1}` : `Outstanding: ₹ ${outstandingBalance.toLocaleString('en-IN')}`}
+                  </span>
                 </div>
 
                 <div className="kpi-card" onClick={() => setActiveTab('examination')}>
@@ -719,20 +745,24 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
               <div className="fee-summary-row">
                 <div className="fee-metric-card">
                   <span className="metric-label">Total Program Fee Paid</span>
-                  <div className="metric-val">₹ 3,20,000</div>
-                  <span className="metric-sub">Across 5 Semesters</span>
+                  <div className="metric-val">₹ {totalFeePaid.toLocaleString('en-IN')}.00</div>
+                  <span className="metric-sub">Across {feeTransactions.length} Semesters</span>
                 </div>
 
                 <div className="fee-metric-card">
                   <span className="metric-label">Current Semester Fee</span>
-                  <div className="metric-val">₹ 62,500</div>
-                  <span className="metric-sub">Semester {student.semester}</span>
+                  <div className="metric-val">₹ {currentSemesterFee.toLocaleString('en-IN')}.00</div>
+                  <span className="metric-sub">Semester {student.semester || 1}</span>
                 </div>
 
-                <div className="fee-metric-card success-card">
+                <div className={`fee-metric-card ${isFeeCleared ? 'success-card' : 'warning-card'}`}>
                   <span className="metric-label">Outstanding Balance</span>
-                  <div className="metric-val text-green">₹ 0.00</div>
-                  <span className="metric-sub text-green">✔ Status: Fully Cleared (No Dues)</span>
+                  <div className={`metric-val ${isFeeCleared ? 'text-green' : 'text-amber'}`}>
+                    ₹ {outstandingBalance.toLocaleString('en-IN')}.00
+                  </div>
+                  <span className={`metric-sub ${isFeeCleared ? 'text-green' : 'text-amber'}`}>
+                    {isFeeCleared ? '✔ Status: Fully Cleared (No Dues)' : `Pending Dues: ₹ ${outstandingBalance.toLocaleString('en-IN')}`}
+                  </span>
                 </div>
               </div>
 

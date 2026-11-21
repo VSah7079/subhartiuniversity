@@ -1024,6 +1024,54 @@ export default function AdminEditorModal({
                 </div>
               </div>
 
+              {/* Upper Summary Cards KPI Controls */}
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px 16px', marginBottom: '18px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '800', color: '#0f2137', marginBottom: '8px' }}>
+                  📊 Uppar Wala Summary Cards (Leave blank for automatic calculation from transactions table below):
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                      Total Program Fee Paid (₹):
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.totalFeePaid ?? ''}
+                      onChange={(e) => handleInputChange('totalFeePaid', e.target.value)}
+                      placeholder={`Auto: ₹ ${(formData.feeTransactions || []).reduce((s, c) => s + (Number(c.amount) || 0), 0).toLocaleString('en-IN')}`}
+                      className="admin-text-input"
+                      style={{ width: '100%', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                      Current Semester Fee (₹):
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.currentSemesterFee ?? ''}
+                      onChange={(e) => handleInputChange('currentSemesterFee', e.target.value)}
+                      placeholder="Auto: from current semester receipt"
+                      className="admin-text-input"
+                      style={{ width: '100%', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                      Outstanding Balance (₹):
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.outstandingBalance ?? ''}
+                      onChange={(e) => handleInputChange('outstandingBalance', e.target.value)}
+                      placeholder="0.00"
+                      className="admin-text-input"
+                      style={{ width: '100%', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="table-responsive">
                 <table className="admin-editor-table">
                   <thead>

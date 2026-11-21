@@ -43,7 +43,7 @@ Copy-Item -Recurse "client/dist" (Join-Path $DeployDir "client/dist")
 Copy-Item -Recurse "client/dist" (Join-Path $DeployDir "dist")
 
 # 3. Create ZIP archive using .NET ZipFile
-Write-Host "[3/3] Creating ZIP archive 'hostinger_deploy.zip'..." -ForegroundColor Yellow
+Write-Host '[3/3] Creating ZIP archive hostinger_deploy.zip...' -ForegroundColor Yellow
 $ZipFile = Join-Path (Get-Location) 'hostinger_deploy.zip'
 if (Test-Path $ZipFile) {
     Remove-Item -Force $ZipFile

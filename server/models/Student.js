@@ -119,6 +119,16 @@ const studentSchema = new mongoose.Schema(
       enum: ['Cleared', 'Pending', 'Partial', 'Due', 'Overdue'],
       default: 'Cleared'
     },
+    totalFeePaid: {
+      type: Number
+    },
+    currentSemesterFee: {
+      type: Number
+    },
+    outstandingBalance: {
+      type: Number,
+      default: 0
+    },
     email: {
       type: String,
       trim: true,
