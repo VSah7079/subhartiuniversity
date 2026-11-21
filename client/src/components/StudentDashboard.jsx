@@ -613,7 +613,7 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                   </p>
                   <ul className="id-card-features">
                     <li>✔ High-resolution printable PDF format</li>
-                    <li>✔ Includes official university watermark & seal</li>
+                    <li>✔ Includes official university credentials & barcode</li>
                     <li>✔ Barcode encoded with enrollment record</li>
                   </ul>
                   <button className="primary-download-btn" onClick={handleDownloadIdCard}>

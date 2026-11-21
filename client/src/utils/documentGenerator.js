@@ -144,8 +144,7 @@ export function downloadIdCard(student) {
           <div style="font-family: monospace; font-size: 16px; letter-spacing: 4px; font-weight: 800; color: #334155;">||| | |||| | ||||| ||</div>
           <div style="font-size: 9px; color: #64748b; margin-top: 2px;">ID: ${student.studentId} • VALID TILL: JUNE 2027</div>
         </div>
-        <div style="text-align: center;">
-          <div style="font-size: 10px; font-family: cursive; color: #1e3a8a; font-weight: 700;">Dr. V.P. Singh</div>
+        <div style="text-align: center; width: 100px;">
           <div style="font-size: 9px; color: #64748b; border-top: 1px solid #94a3b8; padding-top: 2px; font-weight: 700;">REGISTRAR</div>
         </div>
       </div>
@@ -226,10 +225,7 @@ export function downloadFeeReceipt(student, transaction) {
           <p style="margin: 2px 0 0 0;">Bar-code Verification: SVSU-ERP-${transaction.receiptNo.replace(/[^a-zA-Z0-9]/g, '')}</p>
         </div>
         <div style="text-align: center; width: 180px;">
-          <div style="width: 70px; height: 70px; border: 2px dashed #059669; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; color: #059669; font-size: 10px; font-weight: 800; transform: rotate(-8deg);">
-            SVSU PAID<br/>ACCOUNTS
-          </div>
-          <span style="font-size: 11px; font-weight: 700; color: #334155;">Authorised Cashier / Accounts</span>
+          <div style="border-top: 1px solid #64748b; width: 160px; margin: 40px auto 4px; padding-top: 4px; font-size: 11px; font-weight: 700; color: #334155;">Authorised Cashier / Accounts</div>
         </div>
       </div>
     </div>
@@ -327,13 +323,12 @@ export function downloadAdmitCard(student) {
       </div>
 
       <!-- Signatures -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 40px;">
         <div style="text-align: center;">
           <div style="border-top: 1px solid #64748b; width: 140px; padding-top: 4px; font-size: 11px; font-weight: 700;">Candidate Signature</div>
         </div>
         <div style="text-align: center;">
-          <div style="font-family: cursive; font-size: 13px; color: #1e3a8a; font-weight: 700;">Dr. Pankaj Tyagi</div>
-          <div style="border-top: 1px solid #64748b; width: 170px; padding-top: 4px; font-size: 11px; font-weight: 700;">Controller of Examinations (COE)</div>
+          <div style="border-top: 1px solid #64748b; width: 190px; padding-top: 4px; font-size: 11px; font-weight: 700;">Controller of Examinations (COE)</div>
         </div>
       </div>
     </div>
@@ -415,14 +410,13 @@ export function downloadMarksheet(student, resultData) {
       </div>
 
       <!-- Footer Stamp -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 40px;">
         <div style="font-size: 10px; color: #64748b;">
           Disclaimer: This is a system-generated provisional marksheet published on ERP portal.<br/>
           Original grade certificate will be issued by the Examination Registrar.
         </div>
         <div style="text-align: center;">
-          <div style="font-family: cursive; font-size: 13px; color: #1e3a8a; font-weight: 700;">Dr. Pankaj Tyagi</div>
-          <div style="border-top: 1px solid #64748b; width: 160px; padding-top: 4px; font-size: 11px; font-weight: 700;">Controller of Examinations</div>
+          <div style="border-top: 1px solid #64748b; width: 180px; padding-top: 4px; font-size: 11px; font-weight: 700;">Controller of Examinations</div>
         </div>
       </div>
     </div>
@@ -485,15 +479,9 @@ export function downloadOfficialLetter(student, letterType) {
       </div>
 
       <!-- Signatory -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 40px;">
-        <div>
-          <div style="width: 75px; height: 75px; border: 2px dashed #0f2137; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #0f2137; font-size: 9px; font-weight: 800; text-align: center;">
-            SVSU<br/>OFFICIAL<br/>SEAL
-          </div>
-        </div>
+      <div style="display: flex; justify-content: flex-end; align-items: flex-end; padding-top: 60px;">
         <div style="text-align: center;">
-          <div style="font-family: cursive; font-size: 14px; color: #1e3a8a; font-weight: 700;">Dr. V.P. Singh</div>
-          <div style="border-top: 1.5px solid #0f2137; width: 180px; padding-top: 4px; font-size: 12px; font-weight: 700; color: #0f2137;">
+          <div style="border-top: 1.5px solid #0f2137; width: 220px; padding-top: 4px; font-size: 12px; font-weight: 700; color: #0f2137;">
             Registrar / Dy. Registrar<br/>
             <span style="font-size: 10px; color: #64748b; font-weight: 500;">Swami Vivekanand Subharti University</span>
           </div>
@@ -540,7 +528,7 @@ export function downloadNotice(notice) {
         <p style="margin-top: 14px;">All concerned students, faculty members, and departments are requested to take note of the above instruction and comply accordingly.</p>
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 30px; border-top: 1px dashed #cbd5e1;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 50px; border-top: 1px dashed #cbd5e1;">
         <div style="font-size: 10px; color: #64748b;">
           Copy to:<br/>
           1. Hon'ble Vice Chancellor's Secretariat<br/>
@@ -548,7 +536,6 @@ export function downloadNotice(notice) {
           3. University Web Portal & Student Internship / Notis Board
         </div>
         <div style="text-align: center;">
-          <div style="font-family: cursive; font-size: 13px; color: #1e3a8a; font-weight: 700;">By Order of Competent Authority</div>
           <div style="border-top: 1px solid #64748b; width: 220px; padding-top: 4px; font-size: 11px; font-weight: 700; color: #0f2137;">
             ${notice.signatory || 'Registrar / TPO Head, SVSU Meerut'}
           </div>
