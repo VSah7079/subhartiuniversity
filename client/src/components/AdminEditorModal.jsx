@@ -63,6 +63,28 @@ export const DEFAULT_FOUR_YEAR_RESULTS = [
   }
 ];
 
+export const DEFAULT_MBBS_EXAM_SCHEDULE = [
+  // Year 1 (3 Papers)
+  { year: 'Year 1', date: '18 Jun 2017', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-1', subjectName: 'ANATOMY', room: 'Hall B-204, Medical Block', status: 'Completed' },
+  { year: 'Year 1', date: '21 Jun 2017', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-2', subjectName: 'PHYSIOLOGY', room: 'Hall B-204, Medical Block', status: 'Completed' },
+  { year: 'Year 1', date: '24 Jun 2017', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-3', subjectName: 'BIOCHEMISTRY', room: 'Hall B-204, Medical Block', status: 'Completed' },
+  // Year 2 (4 Papers)
+  { year: 'Year 2', date: '03 Jun 2018', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-1', subjectName: 'PHARMACOLOGY', room: 'Hall A-102, Medical Block', status: 'Completed' },
+  { year: 'Year 2', date: '06 Jun 2018', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-2', subjectName: 'MICROBIOLOGY', room: 'Hall A-102, Medical Block', status: 'Completed' },
+  { year: 'Year 2', date: '09 Jun 2018', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-3', subjectName: 'PATHOLOGY', room: 'Hall A-102, Medical Block', status: 'Completed' },
+  { year: 'Year 2', date: '12 Jun 2018', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-4', subjectName: 'FMT', room: 'Hall A-102, Medical Block', status: 'Completed' },
+  // Year 3 (4 Papers)
+  { year: 'Year 3', date: '07 Dec 2019', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-1', subjectName: 'ENT', room: 'Hall C-301, Medical Block', status: 'Completed' },
+  { year: 'Year 3', date: '10 Dec 2019', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-2', subjectName: 'OPHTHALMOLOGY', room: 'Hall C-301, Medical Block', status: 'Completed' },
+  { year: 'Year 3', date: '13 Dec 2019', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-3', subjectName: 'SPM', room: 'Hall C-301, Medical Block', status: 'Completed' },
+  { year: 'Year 3', date: '16 Dec 2019', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-4', subjectName: 'OPD CLINICAL', room: 'Hall C-301, Medical Block', status: 'Completed' },
+  // Year 4 (4 Papers)
+  { year: 'Year 4', date: '08 Dec 2020', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-1', subjectName: 'MEDICINE', room: 'Auditorium Hall, Medical Block', status: 'Completed' },
+  { year: 'Year 4', date: '11 Dec 2020', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-2', subjectName: 'SURGERY', room: 'Auditorium Hall, Medical Block', status: 'Completed' },
+  { year: 'Year 4', date: '14 Dec 2020', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-3', subjectName: 'OBS/GYN', room: 'Auditorium Hall, Medical Block', status: 'Completed' },
+  { year: 'Year 4', date: '17 Dec 2020', time: '10:00 AM - 01:00 PM', subjectCode: 'MBBS-4', subjectName: 'PEDIATRICS', room: 'Auditorium Hall, Medical Block', status: 'Completed' }
+];
+
 export function normalizeResultsForFourYears(results = []) {
   return ['Year 1', 'Year 2', 'Year 3', 'Year 4'].map((yr, idx) => {
     const existing = (results || []).find((r) => {
@@ -115,6 +137,12 @@ const withNormalizedResults = (studentObj) => {
   if (!studentObj) return studentObj;
   const copy = JSON.parse(JSON.stringify(studentObj));
   copy.results = normalizeResultsForFourYears(copy.results);
+  if (Array.isArray(copy.examSchedule)) {
+    copy.examSchedule = copy.examSchedule.map((e) => ({
+      ...e,
+      year: e.year || (e.semester ? (e.semester.includes('1') ? 'Year 1' : e.semester.includes('2') ? 'Year 2' : e.semester.includes('3') ? 'Year 3' : 'Year 4') : 'Year 1')
+    }));
+  }
   return copy;
 };
 
@@ -159,9 +187,9 @@ const DEFAULT_STUDENT_TEMPLATE = {
     { receiptNo: 'REC/2025/0811', date: '22 July 2025', semester: 'Semester 3', amount: 60000, mode: 'Online Netbanking (SBI)', status: 'Cleared', purpose: 'Tuition & Lab Fee' }
   ],
   examSchedule: [
-    { date: '02 Dec 2026', time: '10:00 AM - 01:00 PM', subjectCode: 'CSE-501', subjectName: 'Database Management Systems', room: 'Hall B-204, FET Block', status: 'Upcoming' },
-    { date: '05 Dec 2026', time: '10:00 AM - 01:00 PM', subjectCode: 'CSE-502', subjectName: 'Design & Analysis of Algorithms', room: 'Hall B-204, FET Block', status: 'Upcoming' },
-    { date: '08 Dec 2026', time: '10:00 AM - 01:00 PM', subjectCode: 'CSE-503', subjectName: 'Web Technologies & MERN Stack', room: 'Hall A-102, Main Block', status: 'Upcoming' }
+    { year: 'Year 1', date: '02 Dec 2026', time: '10:00 AM - 01:00 PM', subjectCode: 'CSE-501', subjectName: 'Database Management Systems', room: 'Hall B-204, FET Block', status: 'Upcoming' },
+    { year: 'Year 1', date: '05 Dec 2026', time: '10:00 AM - 01:00 PM', subjectCode: 'CSE-502', subjectName: 'Design & Analysis of Algorithms', room: 'Hall B-204, FET Block', status: 'Upcoming' },
+    { year: 'Year 1', date: '08 Dec 2026', time: '10:00 AM - 01:00 PM', subjectCode: 'CSE-503', subjectName: 'Web Technologies & MERN Stack', room: 'Hall A-102, Main Block', status: 'Upcoming' }
   ],
   results: [
     {
@@ -209,6 +237,7 @@ export default function AdminEditorModal({
 
   // Form State holding the entire student object being edited (guaranteed never null)
   const [selectedResultYearIndex, setSelectedResultYearIndex] = useState(0);
+  const [examYearFilter, setExamYearFilter] = useState('All');
   const [formData, setFormData] = useState(() => {
     return withNormalizedResults(
       currentStudent
@@ -438,6 +467,7 @@ export default function AdminEditorModal({
   const addExamRow = () => {
     const list = [...(formData.examSchedule || [])];
     list.push({
+      year: examYearFilter !== 'All' ? examYearFilter : 'Year 1',
       date: '18 Dec 2026',
       time: '10:00 AM - 01:00 PM',
       subjectCode: 'CSE-506',
@@ -446,6 +476,14 @@ export default function AdminEditorModal({
       status: 'Upcoming'
     });
     setFormData((prev) => ({ ...prev, examSchedule: list }));
+  };
+
+  const loadStandardMbbsExamSchedule = () => {
+    setFormData((prev) => ({
+      ...prev,
+      examSchedule: JSON.parse(JSON.stringify(DEFAULT_MBBS_EXAM_SCHEDULE))
+    }));
+    if (showToast) showToast('Loaded standard 4-Year MBBS exam schedule (15 papers)!');
   };
 
   const removeExamRow = (index) => {
@@ -1512,20 +1550,79 @@ export default function AdminEditorModal({
           {/* TAB 5: EXAM SCHEDULE & HALL TICKET */}
           {activeTab === 'exam' && (
             <div className="admin-subtable-section">
-              <div className="subtable-header">
+              <div className="subtable-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                 <div>
-                  <h4>Examination Schedule & Hall Ticket Papers</h4>
-                  <p>Edited exam papers will automatically reflect in the downloadable Official Admit Card</p>
+                  <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>Examination Schedule & Hall Ticket Papers</h4>
+                  <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '13px' }}>
+                    Select or assign academic year (Year 1 to Year 4) to each paper. Changes reflect instantly in official Admit Cards.
+                  </p>
                 </div>
-                <button type="button" className="admin-btn-secondary" onClick={addExamRow}>
-                  ➕ Add Exam Paper
-                </button>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="admin-btn-secondary"
+                    onClick={loadStandardMbbsExamSchedule}
+                    style={{ background: '#ecfdf5', borderColor: '#10b981', color: '#047857', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}
+                    title="Load complete 15-subject MBBS schedule mapped to Year 1, 2, 3, 4"
+                  >
+                    <span>📋</span> Pre-fill 4-Year MBBS Schedule (15 Papers)
+                  </button>
+                  <button type="button" className="admin-btn-secondary" onClick={addExamRow} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>➕</span> Add Exam Paper
+                  </button>
+                </div>
+              </div>
+
+              {/* Year Filter Pills for Admin Table */}
+              <div style={{ display: 'flex', gap: '8px', margin: '14px 0 16px 0', flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#475569', marginRight: '4px' }}>Filter by Academic Year:</span>
+                {['All', 'Year 1', 'Year 2', 'Year 3', 'Year 4'].map((yr) => {
+                  const count = yr === 'All'
+                    ? (formData.examSchedule || []).length
+                    : (formData.examSchedule || []).filter(e => (e.year || 'Year 1') === yr).length;
+                  const isSel = examYearFilter === yr;
+                  return (
+                    <button
+                      key={yr}
+                      type="button"
+                      onClick={() => setExamYearFilter(yr)}
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '20px',
+                        border: isSel ? '2px solid #0284c7' : '1px solid #cbd5e1',
+                        background: isSel ? '#0284c7' : '#ffffff',
+                        color: isSel ? '#ffffff' : '#334155',
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <span>{yr === 'All' ? '🌐 All Papers' : `🎓 ${yr}`}</span>
+                      <span
+                        style={{
+                          background: isSel ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
+                          color: isSel ? '#ffffff' : '#64748b',
+                          padding: '1px 6px',
+                          borderRadius: '10px',
+                          fontSize: '10px'
+                        }}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="table-responsive">
                 <table className="admin-editor-table">
                   <thead>
                     <tr>
+                      <th style={{ width: '130px' }}>Exam Year</th>
                       <th>Exam Date</th>
                       <th>Time Slot</th>
                       <th>Paper Code</th>
@@ -1536,69 +1633,98 @@ export default function AdminEditorModal({
                     </tr>
                   </thead>
                   <tbody>
-                    {(formData.examSchedule || []).map((ex, idx) => (
-                      <tr key={idx}>
-                        <td>
-                          <input
-                            type="text"
-                            value={ex.date}
-                            onChange={(e) => handleExamChange(idx, 'date', e.target.value)}
-                            placeholder="02 Dec 2026"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={ex.time}
-                            onChange={(e) => handleExamChange(idx, 'time', e.target.value)}
-                            placeholder="10:00 AM - 01:00 PM"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={ex.subjectCode}
-                            onChange={(e) => handleExamChange(idx, 'subjectCode', e.target.value)}
-                            placeholder="CSE-501"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={ex.subjectName}
-                            onChange={(e) => handleExamChange(idx, 'subjectName', e.target.value)}
-                            placeholder="Database Management Systems"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={ex.room}
-                            onChange={(e) => handleExamChange(idx, 'room', e.target.value)}
-                            placeholder="Hall B-204, FET Block"
-                          />
-                        </td>
-                        <td>
-                          <select
-                            value={ex.status || 'Upcoming'}
-                            onChange={(e) => handleExamChange(idx, 'status', e.target.value)}
-                          >
-                            <option value="Upcoming">Upcoming</option>
-                            <option value="Completed">Completed</option>
-                          </select>
-                        </td>
-                        <td>
-                          <button
-                            type="button"
-                            className="btn-delete-row"
-                            onClick={() => removeExamRow(idx)}
-                            title="Delete exam"
-                          >
-                            🗑️
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {(() => {
+                      const allList = formData.examSchedule || [];
+                      const filteredWithIndex = allList
+                        .map((ex, originalIndex) => ({ ...ex, originalIndex }))
+                        .filter(ex => examYearFilter === 'All' || (ex.year || 'Year 1') === examYearFilter);
+
+                      if (filteredWithIndex.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan="8" style={{ textAlign: 'center', padding: '24px', color: '#64748b', fontSize: '13px' }}>
+                              No exam papers found for <strong>{examYearFilter}</strong>. Click "➕ Add Exam Paper" or "📋 Pre-fill 4-Year MBBS Schedule" above.
+                            </td>
+                          </tr>
+                        );
+                      }
+
+                      return filteredWithIndex.map((ex) => (
+                        <tr key={ex.originalIndex}>
+                          <td>
+                            <select
+                              value={ex.year || 'Year 1'}
+                              onChange={(e) => handleExamChange(ex.originalIndex, 'year', e.target.value)}
+                              style={{ fontWeight: 700, color: '#0369a1', borderColor: '#bae6fd', background: '#f0f9ff' }}
+                            >
+                              <option value="Year 1">Year 1</option>
+                              <option value="Year 2">Year 2</option>
+                              <option value="Year 3">Year 3</option>
+                              <option value="Year 4">Year 4</option>
+                            </select>
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              value={ex.date}
+                              onChange={(e) => handleExamChange(ex.originalIndex, 'date', e.target.value)}
+                              placeholder="02 Dec 2026"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              value={ex.time}
+                              onChange={(e) => handleExamChange(ex.originalIndex, 'time', e.target.value)}
+                              placeholder="10:00 AM - 01:00 PM"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              value={ex.subjectCode}
+                              onChange={(e) => handleExamChange(ex.originalIndex, 'subjectCode', e.target.value)}
+                              placeholder="CSE-501"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              value={ex.subjectName}
+                              onChange={(e) => handleExamChange(ex.originalIndex, 'subjectName', e.target.value)}
+                              placeholder="Database Management Systems"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              value={ex.room}
+                              onChange={(e) => handleExamChange(ex.originalIndex, 'room', e.target.value)}
+                              placeholder="Hall B-204, FET Block"
+                            />
+                          </td>
+                          <td>
+                            <select
+                              value={ex.status || 'Upcoming'}
+                              onChange={(e) => handleExamChange(ex.originalIndex, 'status', e.target.value)}
+                            >
+                              <option value="Upcoming">Upcoming</option>
+                              <option value="Completed">Completed</option>
+                            </select>
+                          </td>
+                          <td>
+                            <button
+                              type="button"
+                              className="btn-delete-row"
+                              onClick={() => removeExamRow(ex.originalIndex)}
+                              title="Delete exam"
+                            >
+                              🗑️
+                            </button>
+                          </td>
+                        </tr>
+                      ));
+                    })()}
                   </tbody>
                 </table>
               </div>

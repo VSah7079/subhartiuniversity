@@ -249,8 +249,10 @@ export function getExamsForYear(examSchedule = [], targetYear) {
   
   // 1. Direct year match if exam has explicit year property or year in semester/code
   const explicitMatches = examSchedule.filter((e) => {
-    if (e.year && parseInt(e.year, 10) === targetYearNum) return true;
-    const str = `${e.semester || ''} ${e.subjectCode || ''} ${e.subjectName || ''}`.toLowerCase();
+    const rawYrStr = String(e.year || e.semester || '');
+    const numMatch = rawYrStr.match(/\d+/);
+    if (numMatch && parseInt(numMatch[0], 10) === targetYearNum) return true;
+    const str = `${e.year || ''} ${e.semester || ''} ${e.subjectCode || ''} ${e.subjectName || ''}`.toLowerCase();
     if (str.includes(`year ${targetYearNum}`) || str.includes(`${targetYearNum}st year`) || str.includes(`${targetYearNum}nd year`) || str.includes(`${targetYearNum}rd year`) || str.includes(`${targetYearNum}th year`)) {
       return true;
     }
@@ -298,9 +300,12 @@ export function downloadAdmitCard(student, yearFilter = null) {
   const examsToPrint = yearFilter ? getExamsForYear(allExams, yearFilter) : allExams;
   const yearHeading = yearFilter ? `YEAR ${yearFilter}` : (student.academicYear || 'ODD SEMESTER 2026-27');
 
-  const examItems = examsToPrint.map((exam, idx) => `
+  const examItems = examsToPrint.map((exam, idx) => {
+    const yrLabel = exam.year || (exam.semester ? (exam.semester.includes('1') ? 'Year 1' : exam.semester.includes('2') ? 'Year 2' : exam.semester.includes('3') ? 'Year 3' : 'Year 4') : 'Year 1');
+    return `
     <tr>
       <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${idx + 1}</td>
+      <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: 700; color: #0369a1;">${yrLabel}</td>
       <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: 700;">${exam.date}</td>
       <td style="padding: 8px; border: 1px solid #cbd5e1;">${exam.time}</td>
       <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: 700; color: #1d4ed8;">${exam.subjectCode}</td>
@@ -308,7 +313,8 @@ export function downloadAdmitCard(student, yearFilter = null) {
       <td style="padding: 8px; border: 1px solid #cbd5e1;">${exam.room}</td>
       <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">__________</td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 
   const content = `
     <div>
@@ -364,6 +370,7 @@ export function downloadAdmitCard(student, yearFilter = null) {
         <thead>
           <tr style="background: #0f2137; color: #ffffff; text-align: left;">
             <th style="padding: 8px; border: 1px solid #0f2137;">#</th>
+            <th style="padding: 8px; border: 1px solid #0f2137;">Academic Year</th>
             <th style="padding: 8px; border: 1px solid #0f2137;">Exam Date</th>
             <th style="padding: 8px; border: 1px solid #0f2137;">Timing</th>
             <th style="padding: 8px; border: 1px solid #0f2137;">Code</th>

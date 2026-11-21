@@ -139,7 +139,8 @@
         "subjectCode": "CSE-501",
         "subjectName": "Database Management Systems",
         "room": "Hall B-204, FET Block",
-        "status": "Upcoming"
+        "status": "Upcoming",
+        "year": "Year 1"
       },
       {
         "date": "05 Dec 2026",
@@ -147,7 +148,8 @@
         "subjectCode": "CSE-502",
         "subjectName": "Design & Analysis of Algorithms",
         "room": "Hall B-204, FET Block",
-        "status": "Upcoming"
+        "status": "Upcoming",
+        "year": "Year 1"
       },
       {
         "date": "08 Dec 2026",
@@ -155,7 +157,8 @@
         "subjectCode": "CSE-503",
         "subjectName": "Web Technologies & MERN Stack",
         "room": "Hall A-102, Main Block",
-        "status": "Upcoming"
+        "status": "Upcoming",
+        "year": "Year 1"
       },
       {
         "date": "11 Dec 2026",
@@ -163,7 +166,8 @@
         "subjectCode": "CSE-504",
         "subjectName": "Operating Systems & Cloud Architecture",
         "room": "Hall A-102, Main Block",
-        "status": "Upcoming"
+        "status": "Upcoming",
+        "year": "Year 1"
       },
       {
         "date": "15 Dec 2026",
@@ -171,7 +175,8 @@
         "subjectCode": "CSE-505",
         "subjectName": "Microprocessor & Interfacing",
         "room": "Hall C-301, IT Block",
-        "status": "Upcoming"
+        "status": "Upcoming",
+        "year": "Year 1"
       }
     ],
     "results": [
@@ -188,7 +193,51 @@
             "total": 90,
             "grade": "O"
           }
-        ]
+        ],
+        "examSession": "",
+        "marks": "",
+        "sgpa": "",
+        "totalCredits": 20,
+        "status": "PASSED FIRST DIVISION"
+      },
+      {
+        "semester": "Year 2",
+        "examSession": "",
+        "marksObtained": "",
+        "totalMarks": "",
+        "marks": "",
+        "percentage": "",
+        "sgpa": "",
+        "totalCredits": 20,
+        "status": "PASSED FIRST DIVISION",
+        "isPublished": false,
+        "subjects": []
+      },
+      {
+        "semester": "Year 3",
+        "examSession": "",
+        "marksObtained": "",
+        "totalMarks": "",
+        "marks": "",
+        "percentage": "",
+        "sgpa": "",
+        "totalCredits": 20,
+        "status": "PASSED FIRST DIVISION",
+        "isPublished": false,
+        "subjects": []
+      },
+      {
+        "semester": "Year 4",
+        "examSession": "",
+        "marksObtained": "",
+        "totalMarks": "",
+        "marks": "",
+        "percentage": "",
+        "sgpa": "",
+        "totalCredits": 20,
+        "status": "PASSED FIRST DIVISION",
+        "isPublished": false,
+        "subjects": []
       }
     ],
     "notices": [
@@ -327,7 +376,8 @@
         "subjectCode": "BCA-301",
         "subjectName": "Database Management Systems",
         "room": "Hall B-101",
-        "status": "Upcoming"
+        "status": "Upcoming",
+        "year": "Year 1"
       },
       {
         "date": "07 Dec 2026",
@@ -335,7 +385,8 @@
         "subjectCode": "BCA-302",
         "subjectName": "Java Programming",
         "room": "Hall B-101",
-        "status": "Upcoming"
+        "status": "Upcoming",
+        "year": "Year 1"
       },
       {
         "date": "10 Dec 2026",
@@ -343,7 +394,8 @@
         "subjectCode": "BCA-303",
         "subjectName": "Operating Systems",
         "room": "Hall A-202",
-        "status": "Upcoming"
+        "status": "Upcoming",
+        "year": "Year 1"
       }
     ],
     "results": [

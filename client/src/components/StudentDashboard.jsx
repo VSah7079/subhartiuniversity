@@ -15,6 +15,7 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
   
   // Selected semester/year for results view
   const [selectedResultSemester, setSelectedResultSemester] = useState('Year 1');
+  const [selectedExamYear, setSelectedExamYear] = useState('All');
 
   // Selected notice for view modal
   const [selectedNotice, setSelectedNotice] = useState(null);
@@ -81,6 +82,12 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
   const isFeeCleared = (student.feeStatus || 'Cleared').toLowerCase() === 'cleared' && outstandingBalance === 0;
 
   const examSchedule = (student.examSchedule && student.examSchedule.length > 0) ? student.examSchedule : [];
+  const filteredExamSchedule = selectedExamYear === 'All'
+    ? examSchedule
+    : examSchedule.filter((e) => {
+        const yr = e.year || (e.semester ? (e.semester.includes('1') ? 'Year 1' : e.semester.includes('2') ? 'Year 2' : e.semester.includes('3') ? 'Year 3' : 'Year 4') : 'Year 1');
+        return yr === selectedExamYear;
+      });
 
   // Results mapping: 100% strictly driven by what the Admin entered in the Admin Panel for THIS student
   const rawResults = (student.results && student.results.length > 0) ? student.results : [];
@@ -1083,11 +1090,56 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                   </button>
                 </div>
 
+                {/* Academic Year Filter Pills */}
+                <div style={{ display: 'flex', gap: '8px', padding: '12px 18px', flexWrap: 'wrap', alignItems: 'center', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#475569', marginRight: '4px' }}>Filter Timetable by Year:</span>
+                  {['All', 'Year 1', 'Year 2', 'Year 3', 'Year 4'].map((yr) => {
+                    const count = yr === 'All'
+                      ? examSchedule.length
+                      : examSchedule.filter(e => {
+                          const y = e.year || (e.semester ? (e.semester.includes('1') ? 'Year 1' : e.semester.includes('2') ? 'Year 2' : e.semester.includes('3') ? 'Year 3' : 'Year 4') : 'Year 1');
+                          return y === yr;
+                        }).length;
+                    const isSel = selectedExamYear === yr;
+                    return (
+                      <button
+                        key={yr}
+                        type="button"
+                        onClick={() => setSelectedExamYear(yr)}
+                        style={{
+                          padding: '5px 12px',
+                          borderRadius: '16px',
+                          border: isSel ? '2px solid #0284c7' : '1px solid #cbd5e1',
+                          background: isSel ? '#0284c7' : '#ffffff',
+                          color: isSel ? '#ffffff' : '#334155',
+                          fontWeight: 700,
+                          fontSize: '11.5px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <span>{yr === 'All' ? '🌐 All Papers' : `🎓 ${yr}`}</span>
+                        <span style={{
+                          background: isSel ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
+                          color: isSel ? '#ffffff' : '#64748b',
+                          padding: '1px 6px',
+                          borderRadius: '10px',
+                          fontSize: '10px'
+                        }}>{count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
                 <div className="responsive-table-wrapper">
                   <table className="erp-table">
                     <thead>
                       <tr>
                         <th>#</th>
+                        <th style={{ textAlign: 'center', width: '110px' }}>Academic Year</th>
                         <th>Exam Date</th>
                         <th>Timing</th>
                         <th>Subject Code</th>
@@ -1097,26 +1149,45 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                       </tr>
                     </thead>
                     <tbody>
-                      {examSchedule.length === 0 ? (
+                      {filteredExamSchedule.length === 0 ? (
                         <tr>
-                          <td colSpan="7" style={{ textAlign: 'center', padding: '28px', color: '#64748b', fontSize: '13px' }}>
-                            ℹ️ No examination schedule papers released for this student yet.
+                          <td colSpan="8" style={{ textAlign: 'center', padding: '28px', color: '#64748b', fontSize: '13px' }}>
+                            ℹ️ No examination schedule papers found for {selectedExamYear === 'All' ? 'this student' : selectedExamYear}.
                           </td>
                         </tr>
                       ) : (
-                        examSchedule.map((exam, idx) => (
-                          <tr key={idx}>
-                            <td>{idx + 1}</td>
-                            <td><strong className="date-strong">{exam.date}</strong></td>
-                            <td>{exam.time}</td>
-                            <td className="code-cell">{exam.subjectCode}</td>
-                            <td><strong>{exam.subjectName}</strong></td>
-                            <td>{exam.room}</td>
-                            <td>
-                              <span className="status-pill upcoming">Upcoming</span>
-                            </td>
-                          </tr>
-                        ))
+                        filteredExamSchedule.map((exam, idx) => {
+                          const yrLabel = exam.year || (exam.semester ? (exam.semester.includes('1') ? 'Year 1' : exam.semester.includes('2') ? 'Year 2' : exam.semester.includes('3') ? 'Year 3' : 'Year 4') : 'Year 1');
+                          return (
+                            <tr key={idx}>
+                              <td>{idx + 1}</td>
+                              <td style={{ textAlign: 'center' }}>
+                                <span style={{
+                                  padding: '3px 9px',
+                                  borderRadius: '4px',
+                                  fontSize: '11px',
+                                  fontWeight: 800,
+                                  background: '#e0f2fe',
+                                  color: '#0369a1',
+                                  border: '1px solid #bae6fd',
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  {yrLabel}
+                                </span>
+                              </td>
+                              <td><strong className="date-strong">{exam.date}</strong></td>
+                              <td>{exam.time}</td>
+                              <td className="code-cell">{exam.subjectCode}</td>
+                              <td><strong>{exam.subjectName}</strong></td>
+                              <td>{exam.room}</td>
+                              <td>
+                                <span className={`status-pill ${(exam.status || 'Upcoming').toLowerCase()}`}>
+                                  {exam.status || 'Upcoming'}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
                   </table>
