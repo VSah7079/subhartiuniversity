@@ -1,4 +1,4 @@
-﻿$ProgressPreference = 'SilentlyContinue'
+$ProgressPreference = 'SilentlyContinue'
 
 Write-Host "=======================================================" -ForegroundColor Cyan
 Write-Host "📦 Packaging SVSU ERP Portal for Hostinger Production..." -ForegroundColor Green
