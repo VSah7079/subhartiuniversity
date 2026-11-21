@@ -38,9 +38,9 @@ Copy-Item "server/package.json" (Join-Path $DeployDir "server/package.json")
 Copy-Item "server/.env.production.example" (Join-Path $DeployDir "server/.env")
 
 # Copy compiled frontend dist
-New-Item -ItemType Directory -Path (Join-Path $DeployDir "client") | Out-Null
-Copy-Item -Recurse "client/dist" (Join-Path $DeployDir "client/dist")
-Copy-Item -Recurse "client/dist" (Join-Path $DeployDir "dist")
+New-Item -ItemType Directory -Path (Join-Path $DeployDir 'client') | Out-Null
+Copy-Item -Recurse 'client/dist' (Join-Path $DeployDir 'client/dist')
+Copy-Item -Recurse 'client/dist' (Join-Path $DeployDir 'dist')
 
 # 3. Create ZIP archive using .NET ZipFile
 Write-Host '[3/3] Creating ZIP archive hostinger_deploy.zip...' -ForegroundColor Yellow

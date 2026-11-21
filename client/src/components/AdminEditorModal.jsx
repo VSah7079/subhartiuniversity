@@ -1292,12 +1292,15 @@ export default function AdminEditorModal({
                     />
                   </div>
                   <div className="form-group">
-                    <label>Semester SGPA</label>
+                    <label>Semester Marks</label>
                     <input
-                      type="number"
-                      step="0.01"
-                      value={currentResult.sgpa || 8.75}
-                      onChange={(e) => handleResultMetaChange('sgpa', parseFloat(e.target.value) || 0)}
+                      type="text"
+                      placeholder="e.g. 450/600, 85%, or 8.5"
+                      value={currentResult.marks !== undefined ? currentResult.marks : (currentResult.sgpa || '')}
+                      onChange={(e) => {
+                        handleResultMetaChange('marks', e.target.value);
+                        handleResultMetaChange('sgpa', e.target.value);
+                      }}
                     />
                   </div>
                   <div className="form-group">

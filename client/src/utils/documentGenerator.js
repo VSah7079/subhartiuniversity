@@ -404,7 +404,7 @@ export function downloadMarksheet(student, resultData) {
 
       <!-- Summary KPI Bar -->
       <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-size: 13px;">
-        <div><strong>Semester SGPA:</strong> <span style="font-size: 16px; color: #1d4ed8; font-weight: 800;">${resultData.sgpa} / 10.0</span></div>
+        <div><strong>Semester Marks:</strong> <span style="font-size: 16px; color: #1d4ed8; font-weight: 800;">${resultData.marks || resultData.sgpa || '—'}</span></div>
         <div><strong>Cumulative CGPA:</strong> <span style="font-size: 16px; color: #f59e0b; font-weight: 800;">${student.cgpa}</span></div>
         <div><strong>Result Status:</strong> <span style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 4px; font-weight: 800;">${resultData.status}</span></div>
       </div>

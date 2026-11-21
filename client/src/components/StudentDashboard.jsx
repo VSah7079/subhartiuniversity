@@ -345,9 +345,11 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                     <span>Cumulative CGPA</span>
                     <span className="kpi-icon">⭐</span>
                   </div>
-                  <div className="kpi-value">{student.cgpa || 8.64} <span className="scale">/ 10</span></div>
+                  <div className="kpi-value">
+                    {student.cgpa || 8.64} {Number(student.cgpa || 8.64) <= 10 && <span className="scale">/ 10</span>}
+                  </div>
                   <div className="progress-bar-shell">
-                    <div className="progress-bar-fill gold-fill" style={{ width: `${((student.cgpa || 8.64) / 10) * 100}%` }}></div>
+                    <div className="progress-bar-fill gold-fill" style={{ width: `${Math.min(100, Number(student.cgpa || 8.64) <= 10 ? (Number(student.cgpa || 8.64) / 10) * 100 : Number(student.cgpa || 8.64))}%` }}></div>
                   </div>
                   <span className="kpi-note gold-note">Grade: A+ (First Class with Distinction)</span>
                 </div>
@@ -1022,8 +1024,8 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
               {/* Result Summary Bar */}
               <div className="result-kpi-banner">
                 <div className="res-kpi-item">
-                  <span className="res-kpi-label">Semester SGPA</span>
-                  <div className="res-kpi-value">{activeResult.sgpa} <span className="scale">/ 10</span></div>
+                  <span className="res-kpi-label">Semester Marks</span>
+                  <div className="res-kpi-value">{activeResult.marks || activeResult.sgpa || '—'}</div>
                 </div>
 
                 <div className="res-kpi-item">
