@@ -348,7 +348,7 @@ export function downloadAdmitCard(student, yearFilter = null) {
         </tr>
         <tr>
           <td style="padding: 4px 8px; font-weight: 700;">Father's Name:</td>
-          <td style="padding: 4px 8px;">${student.fatherName || 'Shri Rajesh Sharma'}</td>
+          <td style="padding: 4px 8px;">${student.fatherName || '—'}</td>
           <td style="padding: 4px 8px; font-weight: 700;">Course / Branch:</td>
           <td style="padding: 4px 8px;">${student.course}</td>
         </tr>
@@ -415,6 +415,19 @@ export function downloadMarksheet(student, resultData) {
     alert(`The marksheet for ${resultData?.semester || 'this academic year'} has not been published or uploaded by the university administration yet.`);
     return;
   }
+  const calcObt = (resultData.subjects || []).reduce((sum, sub) => sum + (Number(sub.total) || 0), 0);
+  const calcTot = (resultData.subjects || []).reduce((sum, sub) => sum + (Number(sub.maxMarks) || 100), 0);
+
+  const obtMarks = (resultData.marksObtained !== undefined && resultData.marksObtained !== '')
+    ? resultData.marksObtained
+    : (resultData.marks && String(resultData.marks).includes('/') ? String(resultData.marks).split('/')[0] : (calcObt > 0 ? calcObt : '—'));
+
+  const totMarks = (resultData.totalMarks !== undefined && resultData.totalMarks !== '')
+    ? resultData.totalMarks
+    : (resultData.marks && String(resultData.marks).includes('/') ? String(resultData.marks).split('/')[1] : (calcTot > 0 ? calcTot : '—'));
+
+  const pctMarks = resultData.percentage || (calcTot > 0 ? `${((Number(obtMarks) / Number(totMarks)) * 100).toFixed(2)}%` : (student.cgpa ? `${student.cgpa}%` : '—'));
+
   const rows = (resultData.subjects || []).map((sub, i) => `
     <tr>
       <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${i + 1}</td>
@@ -455,13 +468,13 @@ export function downloadMarksheet(student, resultData) {
             <td style="padding: 4px 8px; font-weight: 700;">Roll Number:</td>
             <td style="padding: 4px 8px; font-weight: 700;">${student.rollNo}</td>
             <td style="padding: 4px 8px; font-weight: 700;">Father's Name:</td>
-            <td style="padding: 4px 8px;">${student.fatherName || 'Shri Rajesh Sharma'}</td>
+            <td style="padding: 4px 8px;">${student.fatherName || '—'}</td>
           </tr>
           <tr>
             <td style="padding: 4px 8px; font-weight: 700;">Program / Course:</td>
             <td style="padding: 4px 8px;">${student.course}</td>
             <td style="padding: 4px 8px; font-weight: 700;">Academic Session:</td>
-            <td style="padding: 4px 8px; font-weight: 700; color: #1e3a8a;">${resultData.examSession || '2016-2021'}</td>
+            <td style="padding: 4px 8px; font-weight: 700; color: #1e3a8a;">${resultData.examSession || student.academicYear || ''}</td>
           </tr>
         </table>
         <div style="width: 85px; height: 105px; border: 1.5px solid #0f2137; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; overflow: hidden; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.1);">
@@ -495,9 +508,9 @@ export function downloadMarksheet(student, resultData) {
 
       <!-- Summary KPI Bar -->
       <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-size: 13px;">
-        <div><strong>Marks Obtained:</strong> <span style="font-size: 16px; color: #1d4ed8; font-weight: 800;">${resultData.marksObtained || (resultData.marks ? String(resultData.marks).split('/')[0] : '450')}</span></div>
-        <div><strong>Total Marks:</strong> <span style="font-size: 16px; color: #0f2137; font-weight: 800;">${resultData.totalMarks || (resultData.marks && String(resultData.marks).includes('/') ? String(resultData.marks).split('/')[1] : '600')}</span></div>
-        <div><strong>Percentage (%):</strong> <span style="font-size: 16px; color: #f59e0b; font-weight: 800;">${resultData.percentage || (student.cgpa ? `${student.cgpa}%` : '66.73%')}</span></div>
+        <div><strong>Marks Obtained:</strong> <span style="font-size: 16px; color: #1d4ed8; font-weight: 800;">${obtMarks}</span></div>
+        <div><strong>Total Marks:</strong> <span style="font-size: 16px; color: #0f2137; font-weight: 800;">${totMarks}</span></div>
+        <div><strong>Percentage (%):</strong> <span style="font-size: 16px; color: #f59e0b; font-weight: 800;">${pctMarks}</span></div>
         <div><strong>Division / Status:</strong> <span style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 4px; font-weight: 800;">${resultData.status || 'PASSED FIRST DIVISION'}</span></div>
       </div>
 
@@ -533,16 +546,16 @@ export function downloadOfficialLetter(student, letterType) {
 
   let title = 'CHARACTER & CONDUCT CERTIFICATE';
   let refCode = 'SVSU/REG/CHAR/2026/102';
-  let bodyText = `This is to certify that <strong>${student.fullName}</strong>, Son/Daughter of <strong>${student.fatherName || 'Shri Rajesh Sharma'}</strong>, having Enrollment No. <strong>${student.enrollmentNo}</strong>, is a student of <strong>${student.course}</strong> at Swami Vivekanand Subharti University Meerut.<br/><br/>To the best of our knowledge and university records, he/she bears an exemplary moral character, disciplined conduct, and has never been involved in any act detrimental to institutional decorum. We wish him/her success in all future pursuits.`;
+  let bodyText = `This is to certify that <strong>${student.fullName}</strong>, Son/Daughter of <strong>${student.fatherName || '—'}</strong>, having Enrollment No. <strong>${student.enrollmentNo}</strong>, is a student of <strong>${student.course}</strong> at Swami Vivekanand Subharti University Meerut.<br/><br/>To the best of our knowledge and university records, he/she bears an exemplary moral character, disciplined conduct, and has never been involved in any act detrimental to institutional decorum. We wish him/her success in all future pursuits.`;
 
   if (isBonafide) {
     title = 'BONAFIDE STUDENT CERTIFICATE';
     refCode = 'SVSU/REG/BONA/2026/894';
-    bodyText = `This is to certify that <strong>${student.fullName}</strong>, S/o <strong>${student.fatherName || 'Shri Rajesh Sharma'}</strong>, bearing University Enrollment Number <strong>${student.enrollmentNo}</strong> and Roll Number <strong>${student.rollNo}</strong>, is a bonafide regular student of this University enrolled in the program <strong>${student.course}</strong>${semText} under the <strong>${deptText}</strong> for the academic session <strong>${student.academicYear || '2016-2021'}</strong>.<br/><br/>As per university records, his/her academic progress and disciplinary conduct during the study tenure have been found satisfactory. This certificate is issued upon student's request for official purposes.`;
+    bodyText = `This is to certify that <strong>${student.fullName}</strong>, S/o <strong>${student.fatherName || '—'}</strong>, bearing University Enrollment Number <strong>${student.enrollmentNo}</strong> and Roll Number <strong>${student.rollNo}</strong>, is a bonafide regular student of this University enrolled in the program <strong>${student.course}</strong>${semText} under the <strong>${deptText}</strong> for the academic session <strong>${student.academicYear || '2016-2021'}</strong>.<br/><br/>As per university records, his/her academic progress and disciplinary conduct during the study tenure have been found satisfactory. This certificate is issued upon student's request for official purposes.`;
   } else if (isInternship) {
     title = 'INTERNSHIP RECOMMENDATION & NO OBJECTION CERTIFICATE (NOC)';
     refCode = 'SVSU/TPO/INTERN/2026/418';
-    bodyText = `This is to certify that <strong>${student.fullName}</strong>, Son/Daughter of <strong>${student.fatherName || 'Shri Rajesh Sharma'}</strong>, bearing Enrollment Number <strong>${student.enrollmentNo}</strong> and Roll Number <strong>${student.rollNo}</strong>, is a bonafide student of <strong>${student.course}</strong>${semText} in the <strong>${deptText}</strong> at Swami Vivekanand Subharti University, Meerut.<br/><br/>The University has <strong>No Objection</strong> to the student undertaking an industry Internship / Practical Training assignment. The training is recognized as a vital component for academic excellence and corporate exposure.<br/><br/>During his/her tenure at this institution, the student has maintained satisfactory academic standards and exemplary discipline. We strongly recommend him/her for the internship opportunity and wish them grand success in all professional endeavors.`;
+    bodyText = `This is to certify that <strong>${student.fullName}</strong>, Son/Daughter of <strong>${student.fatherName || '—'}</strong>, bearing Enrollment Number <strong>${student.enrollmentNo}</strong> and Roll Number <strong>${student.rollNo}</strong>, is a bonafide student of <strong>${student.course}</strong>${semText} in the <strong>${deptText}</strong> at Swami Vivekanand Subharti University, Meerut.<br/><br/>The University has <strong>No Objection</strong> to the student undertaking an industry Internship / Practical Training assignment. The training is recognized as a vital component for academic excellence and corporate exposure.<br/><br/>During his/her tenure at this institution, the student has maintained satisfactory academic standards and exemplary discipline. We strongly recommend him/her for the internship opportunity and wish them grand success in all professional endeavors.`;
   }
 
   const content = `

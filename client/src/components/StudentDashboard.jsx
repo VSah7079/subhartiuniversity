@@ -53,27 +53,16 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
     reader.readAsDataURL(file);
   };
 
-  // Fallback defaults if data fields are not set or empty
-  const subjectsAttendance = (student.subjectsAttendance && student.subjectsAttendance.length > 0) ? student.subjectsAttendance : [
-    { code: 'CSE-501', name: 'Database Management Systems', total: 42, attended: 39, percentage: 92.8, teacher: 'Dr. Amit Vashistha' },
-    { code: 'CSE-502', name: 'Design & Analysis of Algorithms', total: 40, attended: 35, percentage: 87.5, teacher: 'Prof. Neha Gupta' },
-    { code: 'CSE-503', name: 'Web Technologies & MERN Stack', total: 44, attended: 42, percentage: 95.4, teacher: 'Er. Sachin Tyagi' },
-    { code: 'CSE-504', name: 'Operating Systems & Cloud Architecture', total: 38, attended: 32, percentage: 84.2, teacher: 'Dr. Vivek Kumar' },
-    { code: 'CSE-505', name: 'Microprocessor & Interfacing', total: 36, attended: 31, percentage: 86.1, teacher: 'Prof. Manoj Sharma' },
-    { code: 'CSE-506P', name: 'Database Systems Lab', total: 20, attended: 19, percentage: 95.0, teacher: 'Er. Sachin Tyagi' }
-  ];
+  // Student data strictly from the logged-in student's database record
+  const subjectsAttendance = (student.subjectsAttendance && student.subjectsAttendance.length > 0) ? student.subjectsAttendance : [];
 
-  const feeTransactions = (student.feeTransactions && student.feeTransactions.length > 0) ? student.feeTransactions : [
-    { receiptNo: 'REC/2026/0942', date: '14 July 2026', semester: 'Semester 5', amount: 62500, mode: 'Online Netbanking (HDFC)', status: 'Cleared', purpose: 'Tuition & Development Fee' },
-    { receiptNo: 'REC/2026/0128', date: '10 Jan 2026', semester: 'Semester 4', amount: 62500, mode: 'UPI / QR Payment (PhonePe)', status: 'Cleared', purpose: 'Tuition & Examination Fee' },
-    { receiptNo: 'REC/2025/0811', date: '22 July 2025', semester: 'Semester 3', amount: 60000, mode: 'Online Netbanking (SBI)', status: 'Cleared', purpose: 'Tuition & Lab Fee' }
-  ];
+  const feeTransactions = (student.feeTransactions && student.feeTransactions.length > 0) ? student.feeTransactions : [];
 
   // Dynamic Fee Calculations from transaction ledger or student overrides
   const calculatedTotalPaid = feeTransactions.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
-  const totalFeePaid = (student.totalFeePaid && Number(student.totalFeePaid) !== 320000 && Number(student.totalFeePaid) > 0)
+  const totalFeePaid = (student.totalFeePaid !== undefined && student.totalFeePaid !== null && student.totalFeePaid !== '' && Number(student.totalFeePaid) > 0)
     ? Number(student.totalFeePaid)
-    : (calculatedTotalPaid > 0 ? calculatedTotalPaid : (Number(student.totalFeePaid) || 320000));
+    : calculatedTotalPaid;
 
   const currentSemMatch = feeTransactions.find((t) => {
     const semStr = String(t.semester || '').toLowerCase();
@@ -81,7 +70,7 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
     return semStr.includes(`semester ${stuSem}`) || semStr.includes(`sem ${stuSem}`) || semStr === stuSem;
   }) || feeTransactions[0];
 
-  const currentSemesterFee = (student.currentSemesterFee && Number(student.currentSemesterFee) !== 62500 && Number(student.currentSemesterFee) > 0)
+  const currentSemesterFee = (student.currentSemesterFee !== undefined && student.currentSemesterFee !== null && student.currentSemesterFee !== '' && Number(student.currentSemesterFee) > 0)
     ? Number(student.currentSemesterFee)
     : (currentSemMatch ? Number(currentSemMatch.amount) || 0 : (feeTransactions[0] ? Number(feeTransactions[0].amount) || 0 : 0));
 
@@ -91,91 +80,20 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
 
   const isFeeCleared = (student.feeStatus || 'Cleared').toLowerCase() === 'cleared' && outstandingBalance === 0;
 
-  const examSchedule = (student.examSchedule && student.examSchedule.length > 0) ? student.examSchedule : [
-    { date: '02 Dec 2026', time: '10:00 AM - 01:00 PM', subjectCode: 'CSE-501', subjectName: 'Database Management Systems', room: 'Hall B-204, FET Block', status: 'Upcoming' },
-    { date: '05 Dec 2026', time: '10:00 AM - 01:00 PM', subjectCode: 'CSE-502', subjectName: 'Design & Analysis of Algorithms', room: 'Hall B-204, FET Block', status: 'Upcoming' },
-    { date: '08 Dec 2026', time: '10:00 AM - 01:00 PM', subjectCode: 'CSE-503', subjectName: 'Web Technologies & MERN Stack', room: 'Hall A-102, Main Block', status: 'Upcoming' },
-    { date: '11 Dec 2026', time: '10:00 AM - 01:00 PM', subjectCode: 'CSE-504', subjectName: 'Operating Systems & Cloud Architecture', room: 'Hall A-102, Main Block', status: 'Upcoming' }
-  ];
+  const examSchedule = (student.examSchedule && student.examSchedule.length > 0) ? student.examSchedule : [];
 
-  // Default 4-Year Results (Year 1 to Year 4)
-  const defaultFourYearResults = [
-    {
-      semester: 'Year 1',
-      examSession: 'June 2017',
-      marksObtained: 450,
-      totalMarks: 600,
-      marks: '450/600',
-      percentage: '75.00%',
-      sgpa: '450/600',
-      totalCredits: 20,
-      status: 'PASSED FIRST DIVISION',
-      subjects: [
-        { code: 'MBBS-1', name: 'ANATOMY', maxMarks: 100, credits: 4, internal: 27, external: 60, total: 87, grade: 'A+', remarks: 'Passed' },
-        { code: 'MBBS-2', name: 'PHYSIOLOGY', maxMarks: 100, credits: 4, internal: 25, external: 60, total: 85, grade: 'A+', remarks: 'Passed' },
-        { code: 'MBBS-3', name: 'BIOCHEMISTRY', maxMarks: 100, credits: 4, internal: 26, external: 61, total: 87, grade: 'A+', remarks: 'Passed' }
-      ]
-    },
-    {
-      semester: 'Year 2',
-      examSession: 'June 2018',
-      marksObtained: 540,
-      totalMarks: 700,
-      marks: '540/700',
-      percentage: '77.14%',
-      sgpa: '540/700',
-      totalCredits: 22,
-      status: 'PASSED FIRST DIVISION',
-      subjects: [
-        { code: 'MBBS-1', name: 'PHARMACOLOGY', maxMarks: 100, credits: 4, internal: 26, external: 62, total: 88, grade: 'A+', remarks: 'Passed' },
-        { code: 'MBBS-2', name: 'MICROBIOLOGY', maxMarks: 100, credits: 4, internal: 25, external: 60, total: 85, grade: 'A+', remarks: 'Passed' },
-        { code: 'MBBS-3', name: 'PATHOLOGY', maxMarks: 100, credits: 4, internal: 28, external: 64, total: 92, grade: 'O', remarks: 'Passed' },
-        { code: 'MBBS-4', name: 'FMT', maxMarks: 100, credits: 4, internal: 27, external: 61, total: 88, grade: 'A+', remarks: 'Passed' }
-      ]
-    },
-    {
-      semester: 'Year 3',
-      examSession: 'Dec 2019',
-      marksObtained: 520,
-      totalMarks: 700,
-      marks: '520/700',
-      percentage: '74.28%',
-      sgpa: '520/700',
-      totalCredits: 22,
-      status: 'PASSED FIRST DIVISION',
-      subjects: [
-        { code: 'MBBS-1', name: 'ENT', maxMarks: 100, credits: 4, internal: 27, external: 60, total: 87, grade: 'A+', remarks: 'Passed' },
-        { code: 'MBBS-2', name: 'OPHTHALMOLOGY', maxMarks: 100, credits: 4, internal: 26, external: 59, total: 85, grade: 'A+', remarks: 'Passed' },
-        { code: 'MBBS-3', name: 'SPM', maxMarks: 100, credits: 4, internal: 25, external: 61, total: 86, grade: 'A+', remarks: 'Passed' },
-        { code: 'MBBS-4', name: 'OPD CLINICAL', maxMarks: 100, credits: 4, internal: 28, external: 63, total: 91, grade: 'O', remarks: 'Passed' }
-      ]
-    },
-    {
-      semester: 'Year 4',
-      examSession: 'Dec 2020',
-      marksObtained: 550,
-      totalMarks: 700,
-      marks: '550/700',
-      percentage: '78.57%',
-      sgpa: '550/700',
-      totalCredits: 24,
-      status: 'PASSED WITH DISTINCTION',
-      subjects: [
-        { code: 'MBBS-1', name: 'MEDICINE', maxMarks: 100, credits: 4, internal: 28, external: 64, total: 92, grade: 'O', remarks: 'Passed' },
-        { code: 'MBBS-2', name: 'SURGERY', maxMarks: 100, credits: 4, internal: 27, external: 62, total: 89, grade: 'A+', remarks: 'Passed' },
-        { code: 'MBBS-3', name: 'OBS/GYN', maxMarks: 100, credits: 4, internal: 26, external: 60, total: 86, grade: 'A+', remarks: 'Passed' },
-        { code: 'MBBS-4', name: 'PEDIATRICS', maxMarks: 100, credits: 4, internal: 28, external: 63, total: 91, grade: 'O', remarks: 'Passed' }
-      ]
-    }
-  ];
-
-  // Merge student's custom saved results with Year 1, Year 2, Year 3, Year 4
-  // CRITICAL REQUIREMENT: Students can ONLY download if the admin has actually uploaded/published that year's marksheet
+  // Results mapping: 100% strictly driven by what the Admin entered in the Admin Panel for THIS student
   const rawResults = (student.results && student.results.length > 0) ? student.results : [];
   const resultsList = ['Year 1', 'Year 2', 'Year 3', 'Year 4'].map((yr, idx) => {
     const existing = rawResults.find((r) => {
       const s = String(r.semester || '').toLowerCase();
-      return s.includes(yr.toLowerCase()) || s.includes(`semester ${idx + 1}`) || s === `semester ${idx + 1}` || s.includes(`sem ${idx + 1}`);
+      return (
+        s.includes(yr.toLowerCase()) ||
+        s.includes(`semester ${idx + 1}`) ||
+        s === `semester ${idx + 1}` ||
+        s.includes(`sem ${idx + 1}`) ||
+        s === `year ${idx + 1}`
+      );
     });
 
     const hasSubjects = existing && Array.isArray(existing.subjects) && existing.subjects.length > 0;
@@ -184,26 +102,38 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
     const isUploaded = !!(existing && isExplicitlyPublished && (hasSubjects || hasExplicitMarks));
 
     if (isUploaded) {
-      const isCseDummy = hasSubjects && existing.subjects[0].code && existing.subjects[0].code.startsWith('CSE');
+      const subs = existing.subjects || [];
+      const calcObt = subs.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+      const calcTot = subs.reduce((sum, s) => sum + (Number(s.maxMarks) || 100), 0);
+
+      const obt = existing.marksObtained !== undefined && existing.marksObtained !== ''
+        ? existing.marksObtained
+        : (existing.marks && String(existing.marks).includes('/') ? String(existing.marks).split('/')[0] : (calcObt > 0 ? calcObt : '—'));
+
+      const tot = existing.totalMarks !== undefined && existing.totalMarks !== ''
+        ? existing.totalMarks
+        : (existing.marks && String(existing.marks).includes('/') ? String(existing.marks).split('/')[1] : (calcTot > 0 ? calcTot : '—'));
+
+      const marksStr = existing.marks || (calcTot > 0 ? `${obt}/${tot}` : String(obt));
+      const pctStr = existing.percentage || (calcTot > 0 ? `${((Number(obt) / Number(tot)) * 100).toFixed(2)}%` : '—');
+
       return {
-        ...defaultFourYearResults[idx],
-        ...existing,
-        semester: yr,
+        semester: existing.semester || yr,
         isUploaded: true,
-        examSession: existing.examSession || defaultFourYearResults[idx].examSession,
-        marksObtained: existing.marksObtained || (existing.marks ? String(existing.marks).split('/')[0] : defaultFourYearResults[idx].marksObtained),
-        totalMarks: existing.totalMarks || (existing.marks && String(existing.marks).includes('/') ? String(existing.marks).split('/')[1] : defaultFourYearResults[idx].totalMarks),
-        marks: existing.marks || existing.sgpa || defaultFourYearResults[idx].marks,
-        percentage: existing.percentage || defaultFourYearResults[idx].percentage,
-        status: existing.status || defaultFourYearResults[idx].status,
-        subjects: isCseDummy ? defaultFourYearResults[idx].subjects : (hasSubjects ? existing.subjects : defaultFourYearResults[idx].subjects)
+        examSession: existing.examSession || '',
+        marksObtained: obt,
+        totalMarks: tot,
+        marks: marksStr,
+        percentage: pctStr,
+        status: existing.status || 'PASSED FIRST DIVISION',
+        subjects: subs
       };
     }
 
     return {
       semester: yr,
       isUploaded: false,
-      examSession: existing?.examSession || (idx === 0 ? 'June 2017' : idx === 1 ? 'June 2018' : idx === 2 ? 'Dec 2019' : 'Dec 2020'),
+      examSession: existing?.examSession || 'Awaiting Declaration',
       marksObtained: '—',
       totalMarks: '—',
       marks: 'Pending',
@@ -515,9 +445,11 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                   </div>
                   <div className="kpi-value">{examSchedule.length} Papers</div>
                   <div className="progress-bar-shell">
-                    <div className="progress-bar-fill orange-fill" style={{ width: '80%' }}></div>
+                    <div className="progress-bar-fill orange-fill" style={{ width: examSchedule.length > 0 ? '80%' : '0%' }}></div>
                   </div>
-                  <span className="kpi-note orange-note">Starts 02 Dec 2026 • Roll #{student.rollNo}</span>
+                  <span className="kpi-note orange-note">
+                    {examSchedule.length > 0 ? `Starts ${examSchedule[0].date} • Roll #${student.rollNo}` : `Roll #${student.rollNo}`}
+                  </span>
                 </div>
               </div>
 
@@ -528,7 +460,7 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                   <div className="panel-card-header">
                     <div>
                       <h3>Upcoming Examination Schedule</h3>
-                      <p>Odd Semester Regular Exams (December 2026)</p>
+                      <p>{student.academicYear ? `Academic Session: ${student.academicYear}` : 'Examination Timetable'}</p>
                     </div>
                     <button className="panel-action-link" onClick={() => setActiveTab('examination')}>
                       View Full Schedule ➔
@@ -536,19 +468,25 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                   </div>
 
                   <div className="dash-exam-list">
-                    {examSchedule.slice(0, 3).map((item, idx) => (
-                      <div key={idx} className="dash-exam-row">
-                        <div className="exam-date-badge">
-                          <strong>{item.date.split(' ')[0]}</strong>
-                          <span>{item.date.split(' ')[1]}</span>
+                    {examSchedule.length === 0 ? (
+                      <p style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '13px' }}>
+                        No examination papers scheduled for this candidate yet.
+                      </p>
+                    ) : (
+                      examSchedule.slice(0, 3).map((item, idx) => (
+                        <div key={idx} className="dash-exam-row">
+                          <div className="exam-date-badge">
+                            <strong>{(item.date || '').split(' ')[0]}</strong>
+                            <span>{(item.date || '').split(' ')[1]}</span>
+                          </div>
+                          <div className="exam-info-col">
+                            <strong>{item.subjectName}</strong>
+                            <span>Code: {item.subjectCode} • Time: {item.time}</span>
+                            <span className="room-meta">📍 {item.room}</span>
+                          </div>
                         </div>
-                        <div className="exam-info-col">
-                          <strong>{item.subjectName}</strong>
-                          <span>Code: {item.subjectCode} • Time: {item.time}</span>
-                          <span className="room-meta">📍 {item.room}</span>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
 
                   <button className="panel-bottom-cta-btn" onClick={handleDownloadAdmit}>
@@ -637,11 +575,11 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                     </div>
                     <div className="data-row">
                       <span className="data-label">Father's Name</span>
-                      <span className="data-value">{student.fatherName || 'Shri Rajesh Sharma'}</span>
+                      <span className="data-value">{student.fatherName || '—'}</span>
                     </div>
                     <div className="data-row">
                       <span className="data-label">Mother's Name</span>
-                      <span className="data-value">{student.motherName || 'Smt. Sunita Sharma'}</span>
+                      <span className="data-value">{student.motherName || '—'}</span>
                     </div>
                     <div className="data-row">
                       <span className="data-label">Date of Birth</span>
@@ -970,32 +908,40 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                       </tr>
                     </thead>
                     <tbody>
-                      {feeTransactions.map((tx, idx) => (
-                        <tr key={idx}>
-                          <td className="receipt-cell">
-                            <strong>{tx.receiptNo}</strong>
-                          </td>
-                          <td>{tx.date}</td>
-                          <td><span className="sem-pill">{tx.semester}</span></td>
-                          <td>{tx.purpose}</td>
-                          <td className="amount-cell">₹ {tx.amount.toLocaleString('en-IN')}.00</td>
-                          <td>{tx.mode}</td>
-                          <td>
-                            <span className="status-pill cleared">
-                              ✔ {tx.status}
-                            </span>
-                          </td>
-                          <td>
-                            <button
-                              className="btn-download-receipt"
-                              onClick={() => handleDownloadReceipt(tx)}
-                              title="Download official receipt PDF"
-                            >
-                              <span>🧾</span> Download Receipt
-                            </button>
+                      {feeTransactions.length === 0 ? (
+                        <tr>
+                          <td colSpan="8" style={{ textAlign: 'center', padding: '28px', color: '#64748b', fontSize: '13px' }}>
+                            ℹ️ No fee payment transactions or receipts on record for this student yet.
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        feeTransactions.map((tx, idx) => (
+                          <tr key={idx}>
+                            <td className="receipt-cell">
+                              <strong>{tx.receiptNo}</strong>
+                            </td>
+                            <td>{tx.date}</td>
+                            <td><span className="sem-pill">{tx.semester}</span></td>
+                            <td>{tx.purpose}</td>
+                            <td className="amount-cell">₹ {tx.amount.toLocaleString('en-IN')}.00</td>
+                            <td>{tx.mode}</td>
+                            <td>
+                              <span className="status-pill cleared">
+                                ✔ {tx.status}
+                              </span>
+                            </td>
+                            <td>
+                              <button
+                                className="btn-download-receipt"
+                                onClick={() => handleDownloadReceipt(tx)}
+                                title="Download official receipt PDF"
+                              >
+                                <span>🧾</span> Download Receipt
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1053,33 +999,41 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                       </tr>
                     </thead>
                     <tbody>
-                      {subjectsAttendance.map((sub, idx) => (
-                        <tr key={idx}>
-                          <td className="code-cell">{sub.code}</td>
-                          <td><strong>{sub.name}</strong></td>
-                          <td className="text-muted">{sub.teacher}</td>
-                          <td style={{ textAlign: 'center' }}>{sub.total}</td>
-                          <td style={{ textAlign: 'center' }}>{sub.attended}</td>
-                          <td style={{ textAlign: 'center' }}>
-                            <div className="percent-bar-wrapper">
-                              <span className="pct-num">{sub.percentage}%</span>
-                              <div className="mini-track">
-                                <div
-                                  className={`mini-fill ${sub.percentage >= 85 ? 'high' : sub.percentage >= 75 ? 'med' : 'low'}`}
-                                  style={{ width: `${sub.percentage}%` }}
-                                ></div>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            {sub.percentage >= 75 ? (
-                              <span className="status-pill safe">✔ Eligible</span>
-                            ) : (
-                              <span className="status-pill warning">⚠ Shortage</span>
-                            )}
+                      {subjectsAttendance.length === 0 ? (
+                        <tr>
+                          <td colSpan="7" style={{ textAlign: 'center', padding: '28px', color: '#64748b', fontSize: '13px' }}>
+                            ℹ️ No subject attendance records uploaded by university faculty for this candidate yet.
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        subjectsAttendance.map((sub, idx) => (
+                          <tr key={idx}>
+                            <td className="code-cell">{sub.code}</td>
+                            <td><strong>{sub.name}</strong></td>
+                            <td className="text-muted">{sub.teacher}</td>
+                            <td style={{ textAlign: 'center' }}>{sub.total}</td>
+                            <td style={{ textAlign: 'center' }}>{sub.attended}</td>
+                            <td style={{ textAlign: 'center' }}>
+                              <div className="percent-bar-wrapper">
+                                <span className="pct-num">{sub.percentage}%</span>
+                                <div className="mini-track">
+                                  <div
+                                    className={`mini-fill ${sub.percentage >= 85 ? 'high' : sub.percentage >= 75 ? 'med' : 'low'}`}
+                                    style={{ width: `${sub.percentage}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              {sub.percentage >= 75 ? (
+                                <span className="status-pill safe">✔ Eligible</span>
+                              ) : (
+                                <span className="status-pill warning">⚠ Shortage</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1142,19 +1096,27 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                       </tr>
                     </thead>
                     <tbody>
-                      {examSchedule.map((exam, idx) => (
-                        <tr key={idx}>
-                          <td>{idx + 1}</td>
-                          <td><strong className="date-strong">{exam.date}</strong></td>
-                          <td>{exam.time}</td>
-                          <td className="code-cell">{exam.subjectCode}</td>
-                          <td><strong>{exam.subjectName}</strong></td>
-                          <td>{exam.room}</td>
-                          <td>
-                            <span className="status-pill upcoming">Upcoming</span>
+                      {examSchedule.length === 0 ? (
+                        <tr>
+                          <td colSpan="7" style={{ textAlign: 'center', padding: '28px', color: '#64748b', fontSize: '13px' }}>
+                            ℹ️ No examination schedule papers released for this student yet.
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        examSchedule.map((exam, idx) => (
+                          <tr key={idx}>
+                            <td>{idx + 1}</td>
+                            <td><strong className="date-strong">{exam.date}</strong></td>
+                            <td>{exam.time}</td>
+                            <td className="code-cell">{exam.subjectCode}</td>
+                            <td><strong>{exam.subjectName}</strong></td>
+                            <td>{exam.room}</td>
+                            <td>
+                              <span className="status-pill upcoming">Upcoming</span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1394,7 +1356,7 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                       Enrollment: <strong style={{ color: '#e11d48' }}>{student.enrollmentNo}</strong> • Roll No: <strong>{student.rollNo}</strong>
                     </div>
                     <div style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}>
-                      Program: <strong>{student.course}</strong> • Father's Name: <strong>{student.fatherName || 'Shri Rajesh Sharma'}</strong>
+                      Program: <strong>{student.course}</strong> • Father's Name: <strong>{student.fatherName || '—'}</strong>
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>

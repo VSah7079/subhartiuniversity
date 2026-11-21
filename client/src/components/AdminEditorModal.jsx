@@ -67,25 +67,35 @@ export function normalizeResultsForFourYears(results = []) {
   return ['Year 1', 'Year 2', 'Year 3', 'Year 4'].map((yr, idx) => {
     const existing = (results || []).find((r) => {
       const s = String(r.semester || '').toLowerCase();
-      return s.includes(yr.toLowerCase()) || s.includes(`semester ${idx + 1}`) || s === `semester ${idx + 1}` || s.includes(`sem ${idx + 1}`);
+      return (
+        s.includes(yr.toLowerCase()) ||
+        s.includes(`semester ${idx + 1}`) ||
+        s === `semester ${idx + 1}` ||
+        s.includes(`sem ${idx + 1}`) ||
+        s === `year ${idx + 1}`
+      );
     });
     if (existing) {
-      const hasSubjects = existing.subjects && existing.subjects.length > 0;
-      const isCseDummy = hasSubjects && existing.subjects[0].code && existing.subjects[0].code.startsWith('CSE');
+      const hasSubjects = Array.isArray(existing.subjects) && existing.subjects.length > 0;
       return {
-        ...DEFAULT_FOUR_YEAR_RESULTS[idx],
         ...existing,
         semester: yr,
-        isPublished: existing.isPublished !== undefined ? existing.isPublished : true,
-        marks: existing.marks || existing.sgpa || (hasSubjects ? DEFAULT_FOUR_YEAR_RESULTS[idx].marks : ''),
-        percentage: existing.percentage || (hasSubjects ? DEFAULT_FOUR_YEAR_RESULTS[idx].percentage : ''),
-        subjects: isCseDummy ? DEFAULT_FOUR_YEAR_RESULTS[idx].subjects : (hasSubjects ? existing.subjects : [])
+        examSession: existing.examSession || '',
+        marksObtained: existing.marksObtained !== undefined ? existing.marksObtained : (existing.marks && String(existing.marks).includes('/') ? String(existing.marks).split('/')[0] : ''),
+        totalMarks: existing.totalMarks !== undefined ? existing.totalMarks : (existing.marks && String(existing.marks).includes('/') ? String(existing.marks).split('/')[1] : ''),
+        marks: existing.marks || '',
+        percentage: existing.percentage || '',
+        sgpa: existing.sgpa || existing.marks || '',
+        totalCredits: existing.totalCredits || 20,
+        status: existing.status || 'PASSED FIRST DIVISION',
+        isPublished: existing.isPublished !== undefined ? existing.isPublished : (hasSubjects ? true : false),
+        subjects: hasSubjects ? existing.subjects : []
       };
     }
     // Brand new unpublished year
     return {
       semester: yr,
-      examSession: idx === 0 ? 'June 2017' : idx === 1 ? 'June 2018' : idx === 2 ? 'Dec 2019' : 'Dec 2020',
+      examSession: '',
       marksObtained: '',
       totalMarks: '',
       marks: '',
@@ -260,7 +270,7 @@ export default function AdminEditorModal({
   // Switch student in editor
   const handleSelectStudent = (enr) => {
     setSelectedEnrollment(enr);
-    const target = studentList.find((s) => s.enrollmentNo === enr);
+    const target = studentList.find((s) => s.enrollmentNo.toLowerCase() === enr.toLowerCase());
     if (target) {
       setFormData(withNormalizedResults(target));
     }
@@ -644,23 +654,31 @@ export default function AdminEditorModal({
 
       showToast(`✔ ${formData.fullName} details successfully updated in ERP Database!`, 'success');
 
-      // Update parent App state so current student immediately refreshes in UI & documents
-      if (onStudentUpdated) {
-        onStudentUpdated(formData);
-      }
+      // Only sync active session if the edited student is the currently logged-in student
+      const isCurrentLoggedInStudent = currentStudent && currentStudent.enrollmentNo &&
+        currentStudent.enrollmentNo.toLowerCase() === formData.enrollmentNo.toLowerCase();
 
-      // Update local storage
-      localStorage.setItem('svsu_student_profile', JSON.stringify(formData));
+      if (isCurrentLoggedInStudent) {
+        if (onStudentUpdated) {
+          onStudentUpdated(formData);
+        }
+        localStorage.setItem('svsu_student_profile', JSON.stringify(formData));
+      }
 
       // Re-fetch student list
       fetchStudents();
     } catch (err) {
       console.error('Save error:', err);
-      // Fallback: update in localStorage & parent even if backend had a network blip
-      if (onStudentUpdated) {
-        onStudentUpdated(formData);
+      // Fallback: only update session if this is the currently logged-in student
+      const isCurrentLoggedInStudent = currentStudent && currentStudent.enrollmentNo &&
+        currentStudent.enrollmentNo.toLowerCase() === formData.enrollmentNo.toLowerCase();
+
+      if (isCurrentLoggedInStudent) {
+        if (onStudentUpdated) {
+          onStudentUpdated(formData);
+        }
+        localStorage.setItem('svsu_student_profile', JSON.stringify(formData));
       }
-      localStorage.setItem('svsu_student_profile', JSON.stringify(formData));
       showToast(`✔ Updated locally and in active session! (${err.message})`, 'success');
     } finally {
       setIsSaving(false);

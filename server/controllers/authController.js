@@ -125,50 +125,26 @@ const studentLogin = async (req, res) => {
     // Issue JWT Token
     const token = signToken(student);
 
-    // Return full student details
-    const studentData = {
-      id: student._id || student.enrollmentNo,
-      fullName: student.fullName,
-      enrollmentNo: student.enrollmentNo,
-      studentId: student.studentId,
-      rollNo: student.rollNo,
-      registrationNo: student.registrationNo,
-      dob: student.dob,
-      fatherName: student.fatherName,
-      motherName: student.motherName,
-      gender: student.gender || 'Male',
-      bloodGroup: student.bloodGroup || 'B+',
-      category: student.category || 'General',
-      phone: student.phone || '+91 98765 43210',
-      guardianPhone: student.guardianPhone || '+91 98123 45678',
-      address: student.address || 'Subhartipuram Campus, Meerut - 250005',
-      course: student.course,
-      branch: student.branch || student.course,
-      semester: student.semester,
-      department: student.department,
-      academicYear: student.academicYear,
-      batch: student.batch || '2023',
-      admissionDate: student.admissionDate || '12 August 2023',
-      mentorName: student.mentorName || 'Dr. RK Sharma (Professor & Head, CSE)',
-      attendance: student.attendance,
-      cgpa: student.cgpa,
-      feeStatus: student.feeStatus,
-      totalFeePaid: student.totalFeePaid,
-      currentSemesterFee: student.currentSemesterFee,
-      outstandingBalance: student.outstandingBalance,
-      email: student.email,
-      subjectsAttendance: student.subjectsAttendance || [],
-      feeTransactions: student.feeTransactions || [],
-      examSchedule: student.examSchedule || [],
-      results: student.results || [],
-      notices: student.notices || []
-    };
+    // Return full student details strictly from database record
+    const studentObj = student.toObject ? student.toObject() : JSON.parse(JSON.stringify(student));
+    delete studentObj.password;
+    delete studentObj.__v;
+
+    studentObj.id = studentObj._id || studentObj.enrollmentNo;
+    studentObj.photoUrl = studentObj.photoUrl || '';
+    studentObj.fatherName = studentObj.fatherName || '';
+    studentObj.motherName = studentObj.motherName || '';
+    studentObj.results = Array.isArray(studentObj.results) ? studentObj.results : [];
+    studentObj.feeTransactions = Array.isArray(studentObj.feeTransactions) ? studentObj.feeTransactions : [];
+    studentObj.examSchedule = Array.isArray(studentObj.examSchedule) ? studentObj.examSchedule : [];
+    studentObj.subjectsAttendance = Array.isArray(studentObj.subjectsAttendance) ? studentObj.subjectsAttendance : [];
+    studentObj.notices = Array.isArray(studentObj.notices) ? studentObj.notices : [];
 
     return res.status(200).json({
       success: true,
       message: 'Authentication successful. Welcome to Subharti ERP Portal.',
       token,
-      student: studentData
+      student: studentObj
     });
   } catch (error) {
     console.error('Login error:', error);

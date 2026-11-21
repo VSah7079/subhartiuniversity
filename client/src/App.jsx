@@ -34,12 +34,29 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Restore saved session if present
+  // Restore saved session if present, and refresh from server for latest data
   useEffect(() => {
     const savedStudent = localStorage.getItem('svsu_student_profile');
     if (savedStudent && token) {
       try {
-        setStudent(JSON.parse(savedStudent));
+        const parsed = JSON.parse(savedStudent);
+        setStudent(parsed);
+        // Refresh with fresh database record in background so newly published marksheets appear immediately
+        if (parsed.enrollmentNo) {
+          fetch(`/api/admin/student/${encodeURIComponent(parsed.enrollmentNo)}`, {
+            headers: {
+              'x-admin-key': sessionStorage.getItem('svsu_admin_key') || 'admin@svsu2026'
+            }
+          })
+            .then((r) => r.json())
+            .then((data) => {
+              if (data.success && data.student) {
+                setStudent(data.student);
+                localStorage.setItem('svsu_student_profile', JSON.stringify(data.student));
+              }
+            })
+            .catch(() => {});
+        }
       } catch {
         localStorage.removeItem('svsu_student_profile');
       }
@@ -92,8 +109,9 @@ export default function App() {
 
   // Handle student data updated from Admin Editor
   const handleStudentUpdated = (updatedStudent) => {
-    // If updated student is the currently logged-in student, sync session state
-    if (!student || student.enrollmentNo.toLowerCase() === updatedStudent.enrollmentNo.toLowerCase()) {
+    // ONLY sync active session if the edited student is indeed the currently logged-in student
+    if (student && updatedStudent && student.enrollmentNo && updatedStudent.enrollmentNo &&
+        student.enrollmentNo.toLowerCase() === updatedStudent.enrollmentNo.toLowerCase()) {
       setStudent(updatedStudent);
       localStorage.setItem('svsu_student_profile', JSON.stringify(updatedStudent));
     }
