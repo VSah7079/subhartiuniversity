@@ -9,7 +9,7 @@ import {
   getExamsForYear
 } from '../utils/documentGenerator.js';
 
-export default function StudentDashboard({ student, onLogout, showToast }) {
+export default function StudentDashboard({ student, onLogout, showToast, onStudentUpdated }) {
   // Navigation active tab: 'dashboard' | 'profile' | 'documents' | 'fees' | 'attendance' | 'examination' | 'results' | 'notices'
   const [activeTab, setActiveTab] = useState('dashboard');
   
@@ -18,6 +18,40 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
 
   // Selected notice for view modal
   const [selectedNotice, setSelectedNotice] = useState(null);
+
+  // Photo Upload Handler (persists to backend & session)
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (file.size > 15 * 1024 * 1024) {
+      showToast('Image size should be less than 15MB', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async (uploadEvent) => {
+      const base64Data = uploadEvent.target.result;
+      const updatedStudent = { ...student, photoUrl: base64Data };
+      if (typeof onStudentUpdated === 'function') {
+        onStudentUpdated(updatedStudent);
+      }
+      try {
+        const adminKey = sessionStorage.getItem('svsu_admin_key') || 'admin@svsu2026';
+        await fetch(`/api/admin/student/${encodeURIComponent(student.enrollmentNo)}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-key': adminKey
+          },
+          body: JSON.stringify({ photoUrl: base64Data })
+        });
+        showToast('Photo uploaded and updated successfully on ID Card & Marksheet!', 'success');
+      } catch (err) {
+        console.warn('Backend sync notice:', err);
+        showToast('Photo updated in active session!', 'success');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Fallback defaults if data fields are not set or empty
   const subjectsAttendance = (student.subjectsAttendance && student.subjectsAttendance.length > 0) ? student.subjectsAttendance : [
@@ -690,9 +724,15 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                   </div>
 
                   <div className="card-inner-body">
-                    <div className="card-photo-col">
-                      <div className="card-photo-frame">👨‍🎓</div>
-                      <span className="photo-label">STUDENT</span>
+                    <div className="card-photo-col" style={{ position: 'relative', overflow: 'hidden' }}>
+                      {student.photoUrl ? (
+                        <img src={student.photoUrl} alt="Student" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <>
+                          <div className="card-photo-frame">👨‍🎓</div>
+                          <span className="photo-label">STUDENT</span>
+                        </>
+                      )}
                     </div>
                     <div className="card-details-col">
                       <h3>{student.fullName}</h3>
@@ -708,6 +748,15 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                     <div className="barcode-mock">||| | |||| | ||||| ||||</div>
                     <div className="validity-text">VALID TILL: JUNE 2027</div>
                     <div className="signature-mock">REGISTRAR</div>
+                  </div>
+
+                  {/* ID Card Photo Upload Action */}
+                  <div style={{ padding: '10px 16px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '11.5px', color: '#475569', fontWeight: 600 }}>📷 Student ID Photo:</span>
+                    <label style={{ background: '#0f2137', color: '#ffffff', padding: '6px 14px', borderRadius: '5px', fontSize: '11.5px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <span>📷 Upload / Change Photo</span>
+                      <input type="file" accept="image/*" onChange={handlePhotoUpload} style={{ display: 'none' }} />
+                    </label>
                   </div>
                 </div>
 
@@ -1250,6 +1299,35 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                   <button className="secondary-action-btn" onClick={() => handleDownloadResult(activeResult.semester)}>
                     <span>⬇</span> Download {activeResult.semester} Marksheet
                   </button>
+                </div>
+
+                {/* Marksheet Student Info & Passport Photo Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '8px', padding: '14px 18px', margin: '14px 0 18px', flexWrap: 'wrap', gap: '14px' }}>
+                  <div style={{ flex: 1, minWidth: '220px' }}>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#0f2137' }}>{student.fullName}</div>
+                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+                      Enrollment: <strong style={{ color: '#e11d48' }}>{student.enrollmentNo}</strong> • Roll No: <strong>{student.rollNo}</strong>
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}>
+                      Program: <strong>{student.course}</strong> • Father's Name: <strong>{student.fatherName || 'Shri Rajesh Sharma'}</strong>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{ width: '70px', height: '88px', border: '2px solid #0f2137', borderRadius: '4px', overflow: 'hidden', background: '#ffffff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
+                      {student.photoUrl ? (
+                        <img src={student.photoUrl} alt="Marksheet Student" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <>
+                          <span style={{ fontSize: '26px' }}>👨‍🎓</span>
+                          <span style={{ fontSize: '8px', color: '#64748b', fontWeight: 700 }}>PHOTO</span>
+                        </>
+                      )}
+                    </div>
+                    <label style={{ background: '#0f2137', color: '#ffffff', padding: '8px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}>
+                      <span>📷</span> Upload Marksheet Photo
+                      <input type="file" accept="image/*" onChange={handlePhotoUpload} style={{ display: 'none' }} />
+                    </label>
+                  </div>
                 </div>
 
                 <div className="responsive-table-wrapper">

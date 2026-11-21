@@ -733,7 +733,57 @@ export default function AdminEditorModal({
         <div className="admin-modal-body">
           {/* TAB 1: PERSONAL PROFILE */}
           {activeTab === 'profile' && (
-            <div className="admin-form-grid">
+            <div>
+              {/* Student Passport Photo Upload Box */}
+              <div style={{ background: '#f8fafc', border: '1.5px solid #cbd5e1', borderRadius: '10px', padding: '16px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                <div style={{ width: '90px', height: '115px', border: '2px solid #0f2137', borderRadius: '6px', overflow: 'hidden', background: '#e2e8f0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
+                  {formData.photoUrl ? (
+                    <img src={formData.photoUrl} alt="Passport Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <>
+                      <span style={{ fontSize: '32px' }}>👨‍🎓</span>
+                      <span style={{ fontSize: '8px', color: '#64748b', fontWeight: 700, marginTop: '2px' }}>NO PHOTO</span>
+                    </>
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: '220px' }}>
+                  <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#0f2137', fontWeight: 800 }}>Student Passport Photo (ID Card & Marksheet)</h4>
+                  <p style={{ margin: '0 0 10px 0', fontSize: '12px', color: '#64748b' }}>
+                    Upload official passport photo. It will automatically be printed on the Student ID Card, Examination Marksheets, and Admit Cards.
+                  </p>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <label style={{ background: '#1e3a8a', color: '#ffffff', padding: '8px 16px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>📁</span> Choose Photo File (JPG/PNG)
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files && e.target.files[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            handleInputChange('photoUrl', ev.target.result);
+                            if (showToast) showToast('Photo loaded! Click "Save All Changes" to persist.', 'success');
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                    {formData.photoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => handleInputChange('photoUrl', '')}
+                        style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5', padding: '8px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+                      >
+                        🗑️ Remove Photo
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-form-grid">
               <div className="form-group">
                 <label>Full Student Name *</label>
                 <input
@@ -914,6 +964,7 @@ export default function AdminEditorModal({
                   placeholder="Subhartipuram Campus Hostel Block-A, Meerut - 250005"
                 />
               </div>
+            </div>
             </div>
           )}
 

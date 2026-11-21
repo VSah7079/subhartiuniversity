@@ -107,6 +107,7 @@ export default function App() {
           student={student}
           onLogout={handleLogout}
           showToast={showToast}
+          onStudentUpdated={handleStudentUpdated}
         />
       ) : (
         /* Exact SVSU Student Login Form matching user's photo */

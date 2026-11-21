@@ -122,9 +122,13 @@ export function downloadIdCard(student) {
 
       <!-- ID Body -->
       <div style="padding: 20px; display: flex; gap: 18px; align-items: center;">
-        <div style="width: 110px; height: 130px; background: #e2e8f0; border: 2px solid #cbd5e1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0;">
-          <div style="font-size: 40px;">👨‍🎓</div>
-          <span style="font-size: 9px; color: #64748b; font-weight: 600; margin-top: 4px;">STUDENT PHOTO</span>
+        <div style="width: 110px; height: 130px; background: #e2e8f0; border: 2px solid #cbd5e1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+          ${student.photoUrl ? `
+            <img src="${student.photoUrl}" alt="Student Photo" style="width: 100%; height: 100%; object-fit: cover;" />
+          ` : `
+            <div style="font-size: 40px;">👨‍🎓</div>
+            <span style="font-size: 9px; color: #64748b; font-weight: 600; margin-top: 4px;">STUDENT PHOTO</span>
+          `}
         </div>
         <div style="flex: 1; font-size: 12px; line-height: 1.6;">
           <h3 style="font-size: 17px; color: #0f2137; margin: 0 0 6px 0; font-weight: 800;">${student.fullName}</h3>
@@ -318,9 +322,13 @@ export function downloadAdmitCard(student, yearFilter = null) {
             <p style="font-size: 12px; color: #e11d48; font-weight: 800; margin: 2px 0 0 0;">EXAMINATION ADMIT CARD / HALL TICKET (${yearHeading.toUpperCase()})</p>
           </div>
         </div>
-        <div style="width: 85px; height: 100px; border: 1px solid #94a3b8; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc;">
-          <span style="font-size: 26px;">👨‍🎓</span>
-          <span style="font-size: 8px; color: #64748b;">PHOTO</span>
+        <div style="width: 85px; height: 105px; border: 1.5px solid #0f2137; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc; overflow: hidden; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          ${student.photoUrl ? `
+            <img src="${student.photoUrl}" alt="Candidate Photo" style="width: 100%; height: 100%; object-fit: cover;" />
+          ` : `
+            <span style="font-size: 26px;">👨‍🎓</span>
+            <span style="font-size: 8px; color: #64748b; font-weight: 700;">PHOTO</span>
+          `}
         </div>
       </div>
 
@@ -430,21 +438,37 @@ export function downloadMarksheet(student, resultData) {
         </div>
       </div>
 
-      <!-- Student Info -->
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 12px;">
-        <tr>
-          <td style="padding: 4px 8px; font-weight: 700; width: 18%;">Student Name:</td>
-          <td style="padding: 4px 8px; width: 32%;">${student.fullName}</td>
-          <td style="padding: 4px 8px; font-weight: 700; width: 18%;">Enrollment No:</td>
-          <td style="padding: 4px 8px; width: 32%; color: #e11d48; font-weight: 800;">${student.enrollmentNo}</td>
-        </tr>
-        <tr>
-          <td style="padding: 4px 8px; font-weight: 700;">Roll Number:</td>
-          <td style="padding: 4px 8px;">${student.rollNo}</td>
-          <td style="padding: 4px 8px; font-weight: 700;">Program / Course:</td>
-          <td style="padding: 4px 8px;">${student.course}</td>
-        </tr>
-      </table>
+      <!-- Student Info & Photo Layout -->
+      <div style="display: flex; justify-content: space-between; align-items: stretch; gap: 16px; margin-bottom: 16px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 14px; background: #f8fafc;">
+        <table style="flex: 1; border-collapse: collapse; font-size: 12px;">
+          <tr>
+            <td style="padding: 4px 8px; font-weight: 700; width: 22%;">Student Name:</td>
+            <td style="padding: 4px 8px; width: 28%; font-weight: 800; color: #0f2137;">${student.fullName}</td>
+            <td style="padding: 4px 8px; font-weight: 700; width: 22%;">Enrollment No:</td>
+            <td style="padding: 4px 8px; width: 28%; color: #e11d48; font-weight: 800;">${student.enrollmentNo}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 8px; font-weight: 700;">Roll Number:</td>
+            <td style="padding: 4px 8px; font-weight: 700;">${student.rollNo}</td>
+            <td style="padding: 4px 8px; font-weight: 700;">Father's Name:</td>
+            <td style="padding: 4px 8px;">${student.fatherName || 'Shri Rajesh Sharma'}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 8px; font-weight: 700;">Program / Course:</td>
+            <td style="padding: 4px 8px;">${student.course}</td>
+            <td style="padding: 4px 8px; font-weight: 700;">Academic Session:</td>
+            <td style="padding: 4px 8px; font-weight: 700; color: #1e3a8a;">${resultData.examSession || '2016-2021'}</td>
+          </tr>
+        </table>
+        <div style="width: 85px; height: 105px; border: 1.5px solid #0f2137; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; overflow: hidden; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.1);">
+          ${student.photoUrl ? `
+            <img src="${student.photoUrl}" alt="Student Photo" style="width: 100%; height: 100%; object-fit: cover;" />
+          ` : `
+            <span style="font-size: 28px;">👨‍🎓</span>
+            <span style="font-size: 8px; color: #64748b; font-weight: 700;">STUDENT PHOTO</span>
+          `}
+        </div>
+      </div>
 
       <!-- Marksheet Table -->
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 11.5px;">
