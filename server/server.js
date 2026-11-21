@@ -73,6 +73,11 @@ if (clientDistPath) {
   app.use(express.static(clientDistPath, {
     maxAge: '1h'
   }));
+  // Redirect root '/' to '/login/StudentLogin' for official student login URL
+  app.get('/', (req, res) => {
+    res.redirect(302, '/login/StudentLogin');
+  });
+
   // Single-Page Application (SPA) client routing fallback
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();

@@ -46,12 +46,29 @@ export default function App() {
     }
   }, [token]);
 
+  // Synchronize URL with /login/StudentLogin as requested
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (!student) {
+      if (path === '/' || path === '' || path.toLowerCase() === '/login' || path.toLowerCase() === '/login/studentlogin') {
+        if (path !== '/login/StudentLogin') {
+          window.history.replaceState(null, '', '/login/StudentLogin');
+        }
+      }
+    } else {
+      if (path === '/login/StudentLogin' || path === '/') {
+        window.history.replaceState(null, '', '/student/dashboard');
+      }
+    }
+  }, [student]);
+
   // Handle successful login
   const handleLoginSuccess = (data) => {
     setToken(data.token);
     setStudent(data.student);
     localStorage.setItem('svsu_token', data.token);
     localStorage.setItem('svsu_student_profile', JSON.stringify(data.student));
+    window.history.pushState(null, '', '/student/dashboard');
   };
 
   // Handle Logout
@@ -60,6 +77,7 @@ export default function App() {
     setToken(null);
     localStorage.removeItem('svsu_token');
     localStorage.removeItem('svsu_student_profile');
+    window.history.replaceState(null, '', '/login/StudentLogin');
     showToast('Signed out successfully from Subharti ERP.', 'info');
   };
 

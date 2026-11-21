@@ -11,7 +11,10 @@
   RewriteCond %{HTTPS} off
   RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-  # 2. Prevent Directory Browsing
+  # 2. Redirect root to /login/StudentLogin for official student portal URL
+  RewriteRule ^$ /login/StudentLogin [R=302,L]
+
+  # 3. Prevent Directory Browsing
   Options -Indexes
 
   # 3. Pass API requests to Node.js backend if using dual-port setup
