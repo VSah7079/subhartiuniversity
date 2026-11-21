@@ -27,15 +27,15 @@ Copy-Item ".env.production.example" -Destination (Join-Path $DeployDir ".env")
 
 # Copy server without node_modules
 New-Item -ItemType Directory -Path (Join-Path $DeployDir "server") | Out-Null
-Copy-Item -Recurse "server/config" (Join-Path $DeployDir "server/config")
-Copy-Item -Recurse "server/controllers" (Join-Path $DeployDir "server/controllers")
-Copy-Item -Recurse "server/middleware" (Join-Path $DeployDir "server/middleware")
-Copy-Item -Recurse "server/models" (Join-Path $DeployDir "server/models")
-Copy-Item -Recurse "server/routes" (Join-Path $DeployDir "server/routes")
-Copy-Item "server/server.js" (Join-Path $DeployDir "server/server.js")
-Copy-Item "server/seed.js" (Join-Path $DeployDir "server/seed.js")
-Copy-Item "server/package.json" (Join-Path $DeployDir "server/package.json")
-Copy-Item "server/.env.production.example" (Join-Path $DeployDir "server/.env")
+Copy-Item -Recurse 'server/config' (Join-Path $DeployDir 'server/config')
+Copy-Item -Recurse 'server/controllers' (Join-Path $DeployDir 'server/controllers')
+Copy-Item -Recurse 'server/middleware' (Join-Path $DeployDir 'server/middleware')
+Copy-Item -Recurse 'server/models' (Join-Path $DeployDir 'server/models')
+Copy-Item -Recurse 'server/routes' (Join-Path $DeployDir 'server/routes')
+Copy-Item 'server/server.js' (Join-Path $DeployDir 'server/server.js')
+Copy-Item 'server/seed.js' (Join-Path $DeployDir 'server/seed.js')
+Copy-Item 'server/package.json' (Join-Path $DeployDir 'server/package.json')
+Copy-Item 'server/.env.production.example' (Join-Path $DeployDir 'server/.env')
 
 # Copy compiled frontend dist
 New-Item -ItemType Directory -Path (Join-Path $DeployDir 'client') | Out-Null

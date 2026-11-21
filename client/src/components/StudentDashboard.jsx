@@ -5,7 +5,8 @@ import {
   downloadAdmitCard,
   downloadMarksheet,
   downloadOfficialLetter,
-  downloadNotice
+  downloadNotice,
+  getExamsForYear
 } from '../utils/documentGenerator.js';
 
 export default function StudentDashboard({ student, onLogout, showToast }) {
@@ -132,9 +133,10 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
     showToast(`Fee Receipt (${tx.receiptNo}) generated!`, 'success');
   };
 
-  const handleDownloadAdmit = () => {
-    downloadAdmitCard(student);
-    showToast('Examination Admit Card / Hall Ticket generated!', 'success');
+  const handleDownloadAdmit = (year = null) => {
+    downloadAdmitCard(student, year);
+    const label = year ? `Year ${year} Admit Card` : 'Examination Admit Card';
+    showToast(`${label} generated successfully!`, 'success');
   };
 
   const handleDownloadResult = () => {
@@ -977,6 +979,88 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                       ))}
                     </tbody>
                   </table>
+                </div>
+              </div>
+
+              {/* Year-wise Admit Card Downloads (Year 1, 2, 3, 4) */}
+              <div className="admit-cards-years-section" style={{ background: '#ffffff', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '20px 24px', margin: '24px 0', boxShadow: '0 4px 16px rgba(15,33,55,0.06)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '18px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '17px', color: '#0f2137', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>🎫</span> Official Examination Admit Cards (Year 1 • Year 2 • Year 3 • Year 4)
+                    </h3>
+                    <p style={{ margin: '3px 0 0 0', fontSize: '12.5px', color: '#64748b' }}>
+                      Select an academic year below to generate and download the respective verified Examination Hall Ticket:
+                    </p>
+                  </div>
+                  <button
+                    className="secondary-action-btn"
+                    onClick={() => handleDownloadAdmit(null)}
+                    style={{ fontSize: '12px', padding: '7px 14px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <span>🖨️</span> Download All Years Admit Card
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                  {[1, 2, 3, 4].map((year) => {
+                    const yearExams = getExamsForYear(examSchedule, year);
+                    return (
+                      <div
+                        key={year}
+                        style={{
+                          background: '#f8fafc',
+                          border: '1.5px solid #cbd5e1',
+                          borderRadius: '10px',
+                          padding: '16px 18px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                          position: 'relative',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        <div style={{ borderTop: '4px solid #1e3a8a', position: 'absolute', top: 0, left: 0, right: 0 }}></div>
+                        <div style={{ marginBottom: '14px', paddingTop: '4px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 800, color: '#1e3a8a', background: '#eff6ff', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
+                              PROFESSIONAL EXAM
+                            </span>
+                            <span style={{ fontSize: '20px' }}>🎫</span>
+                          </div>
+                          <h4 style={{ margin: '4px 0 4px 0', fontSize: '16px', color: '#0f2137', fontWeight: 800 }}>
+                            Year {year} Admit Card
+                          </h4>
+                          <p style={{ margin: 0, fontSize: '12px', color: '#475569' }}>
+                            {yearExams.length > 0 ? `✔ ${yearExams.length} Subjects Registered` : 'Official Hall Ticket'}
+                          </p>
+                        </div>
+                        <button
+                          className="cta-download-admit-btn"
+                          onClick={() => handleDownloadAdmit(year)}
+                          style={{
+                            width: '100%',
+                            padding: '9px 12px',
+                            fontSize: '13px',
+                            fontWeight: 700,
+                            borderRadius: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            background: '#1e3a8a',
+                            color: '#ffffff',
+                            border: 'none',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 4px rgba(30,58,138,0.25)'
+                          }}
+                        >
+                          <span>⬇</span> Download Year {year} Admit Card
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

@@ -234,10 +234,64 @@ export function downloadFeeReceipt(student, transaction) {
 }
 
 /**
- * 3. Download / Print Examination Admit Card / Hall Ticket
+ * Helper to group/filter exams by academic year (Year 1, 2, 3, 4)
  */
-export function downloadAdmitCard(student) {
-  const examItems = (student.examSchedule || []).map((exam, idx) => `
+export function getExamsForYear(examSchedule = [], targetYear) {
+  if (!targetYear) return examSchedule;
+  const targetYearNum = parseInt(targetYear, 10);
+  
+  // 1. Direct year match if exam has explicit year property or year in semester/code
+  const explicitMatches = examSchedule.filter((e) => {
+    if (e.year && parseInt(e.year, 10) === targetYearNum) return true;
+    const str = `${e.semester || ''} ${e.subjectCode || ''} ${e.subjectName || ''}`.toLowerCase();
+    if (str.includes(`year ${targetYearNum}`) || str.includes(`${targetYearNum}st year`) || str.includes(`${targetYearNum}nd year`) || str.includes(`${targetYearNum}rd year`) || str.includes(`${targetYearNum}th year`)) {
+      return true;
+    }
+    return false;
+  });
+  if (explicitMatches.length > 0) return explicitMatches;
+
+  // 2. Extract calendar years from date strings (e.g. 2017, 2018, 2019, 2020)
+  const yearsMap = [];
+  examSchedule.forEach((exam) => {
+    const match = (exam.date || '').match(/\b(20\d\d|19\d\d)\b/);
+    const yr = match ? parseInt(match[1], 10) : null;
+    if (yr && !yearsMap.includes(yr)) {
+      yearsMap.push(yr);
+    }
+  });
+  yearsMap.sort((a, b) => a - b);
+
+  if (yearsMap.length > 0 && targetYearNum <= yearsMap.length) {
+    const matchedCalendarYear = yearsMap[targetYearNum - 1];
+    const dateMatches = examSchedule.filter((exam) => {
+      return (exam.date || '').includes(String(matchedCalendarYear));
+    });
+    if (dateMatches.length > 0) return dateMatches;
+  }
+
+  // 3. Fallback: split total schedule evenly across 4 years
+  const total = examSchedule.length;
+  if (total > 0) {
+    const chunkSize = Math.ceil(total / 4);
+    const start = (targetYearNum - 1) * chunkSize;
+    const end = start + chunkSize;
+    const slice = examSchedule.slice(start, end);
+    if (slice.length > 0) return slice;
+  }
+
+  return examSchedule;
+}
+
+/**
+ * 3. Download / Print Examination Admit Card / Hall Ticket (Supports Year 1, 2, 3, 4 filter)
+ */
+export function downloadAdmitCard(student, yearFilter = null) {
+  const allExams = student.examSchedule || [];
+  const examsToPrint = yearFilter ? getExamsForYear(allExams, yearFilter) : allExams;
+  const yearHeading = yearFilter ? `YEAR ${yearFilter}` : (student.academicYear || 'ODD SEMESTER 2026-27');
+
+  const examItems = examsToPrint.map((exam, idx) => `
     <tr>
       <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${idx + 1}</td>
       <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: 700;">${exam.date}</td>
@@ -258,7 +312,7 @@ export function downloadAdmitCard(student) {
           <div>
             <h1 style="font-size: 18px; color: #0f2137; margin: 0; font-weight: 800;">SWAMI VIVEKANAND SUBHARTI UNIVERSITY</h1>
             <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Subhartipuram, NH-58, Delhi-Haridwar Bypass Road, Meerut - 250005</p>
-            <p style="font-size: 12px; color: #e11d48; font-weight: 800; margin: 2px 0 0 0;">EXAMINATION ADMIT CARD / HALL TICKET (ODD SEMESTER 2026-27)</p>
+            <p style="font-size: 12px; color: #e11d48; font-weight: 800; margin: 2px 0 0 0;">EXAMINATION ADMIT CARD / HALL TICKET (${yearHeading.toUpperCase()})</p>
           </div>
         </div>
         <div style="width: 85px; height: 100px; border: 1px solid #94a3b8; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc;">
@@ -278,23 +332,23 @@ export function downloadAdmitCard(student) {
         <tr>
           <td style="padding: 4px 8px; font-weight: 700;">Enrollment No:</td>
           <td style="padding: 4px 8px;">${student.enrollmentNo}</td>
-          <td style="padding: 4px 8px; font-weight: 700;">Semester:</td>
-          <td style="padding: 4px 8px;">Semester ${student.semester}</td>
+          <td style="padding: 4px 8px; font-weight: 700;">Year / Semester:</td>
+          <td style="padding: 4px 8px;">${yearFilter ? `Year ${yearFilter}` : `Semester ${student.semester || 1}`}</td>
         </tr>
         <tr>
           <td style="padding: 4px 8px; font-weight: 700;">Father's Name:</td>
-          <td style="padding: 4px 8px;">${student.fatherName || 'Rajesh Sharma'}</td>
+          <td style="padding: 4px 8px;">${student.fatherName || 'Shri Rajesh Sharma'}</td>
           <td style="padding: 4px 8px; font-weight: 700;">Course / Branch:</td>
           <td style="padding: 4px 8px;">${student.course}</td>
         </tr>
         <tr>
           <td style="padding: 4px 8px; font-weight: 700;">Exam Center:</td>
-          <td colspan="3" style="padding: 4px 8px; font-weight: 600; color: #1e3a8a;">Faculty of Engineering & Technology (FET Block), Main Exam Center, Meerut</td>
+          <td colspan="3" style="padding: 4px 8px; font-weight: 600; color: #1e3a8a;">FET Main Block Examination Center, Meerut</td>
         </tr>
       </table>
 
       <!-- Exam Schedule Table -->
-      <h3 style="font-size: 13px; color: #0f2137; margin: 0 0 8px 0; font-weight: 700;">SCHEDULE OF REGISTERED SUBJECTS:</h3>
+      <h3 style="font-size: 13px; color: #0f2137; margin: 0 0 8px 0; font-weight: 700;">SCHEDULE OF REGISTERED SUBJECTS (${yearHeading}):</h3>
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11.5px;">
         <thead>
           <tr style="background: #0f2137; color: #ffffff; text-align: left;">
@@ -333,7 +387,8 @@ export function downloadAdmitCard(student) {
       </div>
     </div>
   `;
-  triggerPrintWindow(`Admit_Card_${student.rollNo}`, content);
+  const fileSuffix = yearFilter ? `Year_${yearFilter}` : 'Full';
+  triggerPrintWindow(`Admit_Card_${student.rollNo}_${fileSuffix}`, content);
 }
 
 /**
