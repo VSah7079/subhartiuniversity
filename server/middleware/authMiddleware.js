@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const Student = require('../models/Student');
 const { getDbStatus, getMockStudents } = require('../config/db');
+
+const escapeRegex = (str) => (str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const protect = async (req, res, next) => {
   let token;
@@ -20,7 +23,21 @@ const protect = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'svsu_super_secure_jwt_secret_key_2026_university_erp');
 
     if (getDbStatus()) {
-      const student = await Student.findById(decoded.id).select('-__v');
+      let student = null;
+      if (decoded.id && mongoose.Types.ObjectId.isValid(decoded.id)) {
+        try {
+          student = await Student.findById(decoded.id).select('-__v');
+        } catch (_) {}
+      }
+      if (!student && decoded.enrollmentNo) {
+        student = await Student.findOne({
+          $or: [
+            { enrollmentNo: new RegExp(`^${escapeRegex(decoded.enrollmentNo)}$`, 'i') },
+            { studentId: new RegExp(`^${escapeRegex(decoded.enrollmentNo)}$`, 'i') }
+          ]
+        }).select('-__v');
+      }
+
       if (!student) {
         return res.status(401).json({ success: false, message: 'Student record not found.' });
       }

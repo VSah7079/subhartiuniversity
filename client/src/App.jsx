@@ -5,9 +5,45 @@ import StudentDashboard from './components/StudentDashboard.jsx';
 import AdminEditorModal from './components/AdminEditorModal.jsx';
 import AdminAuthModal from './components/AdminAuthModal.jsx';
 
+const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+
+// Read initial session synchronously so page refresh (F5) NEVER logs out or flashes login
+const getInitialSession = () => {
+  try {
+    const rawProfile = sessionStorage.getItem('svsu_student_profile') || localStorage.getItem('svsu_student_profile');
+    const rawToken = sessionStorage.getItem('svsu_token') || localStorage.getItem('svsu_token');
+    const loginTime = sessionStorage.getItem('svsu_login_timestamp') || localStorage.getItem('svsu_login_timestamp');
+
+    if (!rawProfile || !rawToken) {
+      return { student: null, token: null };
+    }
+
+    // 24 Hour Auto-Logout Check
+    if (loginTime && Date.now() - Number(loginTime) > TWENTY_FOUR_HOURS) {
+      sessionStorage.clear();
+      localStorage.removeItem('svsu_student_profile');
+      localStorage.removeItem('svsu_token');
+      localStorage.removeItem('svsu_login_timestamp');
+      return { student: null, token: null };
+    }
+
+    const parsed = JSON.parse(rawProfile);
+    // Ensure both sessionStorage and localStorage have the session intact
+    sessionStorage.setItem('svsu_student_profile', rawProfile);
+    sessionStorage.setItem('svsu_token', rawToken);
+    sessionStorage.setItem('svsu_login_timestamp', loginTime || String(Date.now()));
+
+    return { student: parsed, token: rawToken };
+  } catch (err) {
+    sessionStorage.clear();
+    return { student: null, token: null };
+  }
+};
+
 export default function App() {
-  const [student, setStudent] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('svsu_token') || null);
+  const initialSession = getInitialSession();
+  const [student, setStudent] = useState(initialSession.student);
+  const [token, setToken] = useState(initialSession.token);
   const [isSwitchUserOpen, setIsSwitchUserOpen] = useState(false);
   const [isAdminAuthOpen, setIsAdminAuthOpen] = useState(false);
   const [isAdminEditorOpen, setIsAdminEditorOpen] = useState(false);
@@ -34,32 +70,35 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Restore saved session if present, and refresh from server for latest data
+  // 24-hour automatic logout timer check
   useEffect(() => {
-    const savedStudent = localStorage.getItem('svsu_student_profile');
-    if (savedStudent && token) {
-      try {
-        const parsed = JSON.parse(savedStudent);
-        setStudent(parsed);
-        // Refresh with fresh database record in background so newly published marksheets appear immediately
-        if (parsed.enrollmentNo) {
-          fetch(`/api/admin/student/${encodeURIComponent(parsed.enrollmentNo)}`, {
-            headers: {
-              'x-admin-key': sessionStorage.getItem('svsu_admin_key') || 'admin@svsu2026'
-            }
-          })
-            .then((r) => r.json())
-            .then((data) => {
-              if (data.success && data.student) {
-                setStudent(data.student);
-                localStorage.setItem('svsu_student_profile', JSON.stringify(data.student));
-              }
-            })
-            .catch(() => {});
-        }
-      } catch {
-        localStorage.removeItem('svsu_student_profile');
+    const timer = setInterval(() => {
+      const loginTime = sessionStorage.getItem('svsu_login_timestamp') || localStorage.getItem('svsu_login_timestamp');
+      if (loginTime && Date.now() - Number(loginTime) > TWENTY_FOUR_HOURS) {
+        handleLogout('Session expired after 24 hours. Please log in again.');
       }
+    }, 60 * 1000); // Check every minute
+    return () => clearInterval(timer);
+  }, []);
+
+  // Background profile sync with server to fetch latest marksheets or admin changes
+  useEffect(() => {
+    if (token && student?.enrollmentNo) {
+      // 1. Fetch via protected student profile endpoint
+      fetch('/api/auth/profile', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success && data.student) {
+            setStudent(data.student);
+            sessionStorage.setItem('svsu_student_profile', JSON.stringify(data.student));
+            localStorage.setItem('svsu_student_profile', JSON.stringify(data.student));
+          }
+        })
+        .catch(() => {});
     }
   }, [token]);
 
@@ -81,21 +120,28 @@ export default function App() {
 
   // Handle successful login
   const handleLoginSuccess = (data) => {
+    const now = Date.now();
     setToken(data.token);
     setStudent(data.student);
+    sessionStorage.setItem('svsu_token', data.token);
+    sessionStorage.setItem('svsu_student_profile', JSON.stringify(data.student));
+    sessionStorage.setItem('svsu_login_timestamp', String(now));
     localStorage.setItem('svsu_token', data.token);
     localStorage.setItem('svsu_student_profile', JSON.stringify(data.student));
+    localStorage.setItem('svsu_login_timestamp', String(now));
     window.history.pushState(null, '', '/student/dashboard');
   };
 
   // Handle Logout
-  const handleLogout = () => {
+  const handleLogout = (message = 'Signed out successfully from Subharti ERP.') => {
     setStudent(null);
     setToken(null);
+    sessionStorage.clear();
     localStorage.removeItem('svsu_token');
     localStorage.removeItem('svsu_student_profile');
+    localStorage.removeItem('svsu_login_timestamp');
     window.history.replaceState(null, '', '/login/StudentLogin');
-    showToast('Signed out successfully from Subharti ERP.', 'info');
+    showToast(message, 'info');
   };
 
   // Handle role selection from Switch User modal
@@ -113,6 +159,7 @@ export default function App() {
     if (student && updatedStudent && student.enrollmentNo && updatedStudent.enrollmentNo &&
         student.enrollmentNo.toLowerCase() === updatedStudent.enrollmentNo.toLowerCase()) {
       setStudent(updatedStudent);
+      sessionStorage.setItem('svsu_student_profile', JSON.stringify(updatedStudent));
       localStorage.setItem('svsu_student_profile', JSON.stringify(updatedStudent));
     }
   };

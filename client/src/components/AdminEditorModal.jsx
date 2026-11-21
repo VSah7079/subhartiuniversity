@@ -77,6 +77,7 @@ export function normalizeResultsForFourYears(results = []) {
     });
     if (existing) {
       const hasSubjects = Array.isArray(existing.subjects) && existing.subjects.length > 0;
+      const hasMarks = !!(existing.marks || existing.marksObtained);
       return {
         ...existing,
         semester: yr,
@@ -88,7 +89,8 @@ export function normalizeResultsForFourYears(results = []) {
         sgpa: existing.sgpa || existing.marks || '',
         totalCredits: existing.totalCredits || 20,
         status: existing.status || 'PASSED FIRST DIVISION',
-        isPublished: existing.isPublished !== undefined ? existing.isPublished : (hasSubjects ? true : false),
+        // Whenever admin enters subjects or marks, ensure isPublished defaults to true so student sees it
+        isPublished: (hasSubjects || hasMarks) ? true : (existing.isPublished !== undefined ? existing.isPublished : false),
         subjects: hasSubjects ? existing.subjects : []
       };
     }
@@ -230,7 +232,18 @@ export default function AdminEditorModal({
     }
   }, [isOpen, currentStudent]);
 
-  const fetchStudents = async () => {
+  const TAB_SEQUENCE = ['profile', 'academic', 'attendance', 'fees', 'exam', 'results', 'notices'];
+  const TAB_LABELS = {
+    profile: 'Personal Profile',
+    academic: 'Academic & Dept',
+    attendance: 'Attendance',
+    fees: 'Fees & Receipts',
+    exam: 'Exam Schedule',
+    results: 'Marksheet & Results',
+    notices: 'Internship & Notis'
+  };
+
+  const fetchStudents = async (targetEnrollment = null) => {
     setIsLoading(true);
     try {
       const adminToken = sessionStorage.getItem('svsu_admin_token') || '';
@@ -246,12 +259,19 @@ export default function AdminEditorModal({
       const data = await res.json();
       if (data.success && data.students && data.students.length > 0) {
         setStudentList(data.students);
-        // If current student exists, select it, else select first
-        const activeEnr = currentStudent ? currentStudent.enrollmentNo : data.students[0].enrollmentNo;
-        setSelectedEnrollment(activeEnr);
+        // Priority for keeping student selected:
+        // 1. targetEnrollment passed into fetchStudents
+        // 2. selectedEnrollment currently active in editor
+        // 3. formData.enrollmentNo
+        // 4. currentStudent
+        // 5. first student in data
+        const desiredEnr = targetEnrollment || selectedEnrollment || (formData && formData.enrollmentNo) || (currentStudent && currentStudent.enrollmentNo) || data.students[0].enrollmentNo;
+        
         const activeStudent = data.students.find(
-          (s) => s.enrollmentNo.toLowerCase() === activeEnr.toLowerCase()
+          (s) => s.enrollmentNo.toLowerCase() === desiredEnr.toLowerCase()
         ) || data.students[0];
+        
+        setSelectedEnrollment(activeStudent.enrollmentNo);
         setFormData(withNormalizedResults(activeStudent));
       } else if (currentStudent) {
         setFormData(withNormalizedResults(currentStudent));
@@ -286,64 +306,39 @@ export default function AdminEditorModal({
       rollNo: `240910${Math.floor(100 + Math.random() * 900)}`,
       registrationNo: `REG-2024-${Math.floor(100 + Math.random() * 900)}`,
       dob: '01012003',
-      fullName: 'New Student Name',
-      fatherName: 'Father Name',
-      motherName: 'Mother Name',
+      fullName: '',
+      fatherName: '',
+      motherName: '',
       gender: 'Male',
-      bloodGroup: 'O+',
+      bloodGroup: 'B+',
       category: 'General',
       phone: '+91 98765 00000',
       guardianPhone: '+91 98123 00000',
       address: 'Subhartipuram Campus, NH-58, Meerut - 250005',
-      course: 'B.Tech - Computer Science & Engineering',
-      branch: 'Computer Science & Engineering',
+      course: 'BACHELOR OF MEDICINE AND BACHELOR OF SURGERY (MBBS)',
+      branch: 'Medical Sciences',
       semester: 1,
-      department: 'Faculty of Engineering & Technology',
-      academicYear: '2024 - 2028',
+      department: 'Subharti Medical College',
+      academicYear: '2024 - 2029',
       batch: '2024',
       admissionDate: '01 August 2024',
-      mentorName: 'Dr. RK Sharma (Professor & Head, CSE)',
+      mentorName: 'Dean / Head of Department',
       attendance: 85.0,
       cgpa: 8.5,
       feeStatus: 'Cleared',
-      email: 'student@subharti.org',
-      subjectsAttendance: [
-        { code: 'CSE-101', name: 'Programming Fundamentals', total: 30, attended: 27, percentage: 90.0, teacher: 'Dr. Amit Vashistha' },
-        { code: 'CSE-102', name: 'Mathematics-I', total: 30, attended: 26, percentage: 86.6, teacher: 'Prof. Neha Gupta' }
-      ],
+      email: '',
+      subjectsAttendance: [],
       feeTransactions: [
-        { receiptNo: `REC/2026/${Math.floor(1000 + Math.random() * 9000)}`, date: '01 Aug 2024', semester: 'Semester 1', amount: 65000, mode: 'Online Netbanking', status: 'Cleared', purpose: 'Tuition & Admission Fee' }
+        { receiptNo: `REC/2026/${Math.floor(1000 + Math.random() * 9000)}`, date: '01 Aug 2024', semester: 'Semester 1', amount: 841485, mode: 'Online Netbanking', status: 'Cleared', purpose: 'Tuition & Development Fee' }
       ],
-      examSchedule: [
-        { date: '10 Dec 2026', time: '10:00 AM - 01:00 PM', subjectCode: 'CSE-101', subjectName: 'Programming Fundamentals', room: 'Hall A-101', status: 'Upcoming' }
-      ],
-      results: [
-        {
-          semester: 'Semester 1',
-          examSession: 'Dec 2024',
-          sgpa: 8.5,
-          totalCredits: 20,
-          status: 'PASSED FIRST DIVISION',
-          subjects: [
-            { code: 'CSE-101', name: 'Programming Fundamentals', internal: 27, external: 60, total: 87, grade: 'A+', credits: 4 }
-          ]
-        }
-      ],
-      notices: [
-        {
-          id: 'notice-1',
-          title: 'Odd Semester Examination Circular',
-          refNo: 'SVSU/EXAM/2026/099',
-          date: '18 Nov 2026',
-          category: 'Examination',
-          description: 'University examination notifications and schedule.',
-          signatory: 'Controller of Examinations'
-        }
-      ]
+      examSchedule: [],
+      results: normalizeResultsForFourYears([]),
+      notices: []
     };
     setFormData(newStudentTemplate);
     setSelectedEnrollment(newStudentTemplate.enrollmentNo);
-    showToast('New student template loaded. Fill details and click Save.', 'info');
+    setActiveTab('profile');
+    showToast('New student form ready! Enter details and click "Save & Next ➡"', 'info');
   };
 
   // Basic Text Input Handler
@@ -626,7 +621,7 @@ export default function AdminEditorModal({
   };
 
   // ----------------- SAVE TO SERVER & LOCALSTATE -----------------
-  const handleSaveAll = async () => {
+  const handleSaveAll = async (advanceTab = false) => {
     if (!formData || !formData.enrollmentNo) {
       showToast('Enrollment Number is required!', 'error');
       return;
@@ -638,6 +633,13 @@ export default function AdminEditorModal({
       const adminToken = sessionStorage.getItem('svsu_admin_token') || '';
       const adminKey = sessionStorage.getItem('svsu_admin_key') || 'admin@svsu2026';
 
+      // Ensure results are normalized and any populated year is published
+      const normalizedResults = normalizeResultsForFourYears(formData.results);
+      const preparedData = {
+        ...formData,
+        results: normalizedResults
+      };
+
       const res = await fetch(`/api/admin/student/${enrEncoded}`, {
         method: 'PUT',
         headers: {
@@ -645,7 +647,7 @@ export default function AdminEditorModal({
           ...(adminToken ? { Authorization: `Bearer ${adminToken}` } : {}),
           'x-admin-key': adminKey
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(preparedData)
       });
 
       const data = await res.json();
@@ -653,21 +655,35 @@ export default function AdminEditorModal({
         throw new Error(data.message || 'Failed to update student data on server.');
       }
 
-      showToast(`✔ ${formData.fullName} details successfully updated in ERP Database!`, 'success');
-
       // Only sync active session if the edited student is the currently logged-in student
       const isCurrentLoggedInStudent = currentStudent && currentStudent.enrollmentNo &&
         currentStudent.enrollmentNo.toLowerCase() === formData.enrollmentNo.toLowerCase();
 
       if (isCurrentLoggedInStudent) {
         if (onStudentUpdated) {
-          onStudentUpdated(formData);
+          onStudentUpdated(preparedData);
         }
-        localStorage.setItem('svsu_student_profile', JSON.stringify(formData));
+        sessionStorage.setItem('svsu_student_profile', JSON.stringify(preparedData));
+        localStorage.setItem('svsu_student_profile', JSON.stringify(preparedData));
       }
 
-      // Re-fetch student list
-      fetchStudents();
+      // Keep this student selected in student list
+      const savedEnr = formData.enrollmentNo;
+      await fetchStudents(savedEnr);
+
+      // Advance to next tab if requested
+      if (advanceTab) {
+        const curIdx = TAB_SEQUENCE.indexOf(activeTab);
+        if (curIdx >= 0 && curIdx < TAB_SEQUENCE.length - 1) {
+          const nextTab = TAB_SEQUENCE[curIdx + 1];
+          setActiveTab(nextTab);
+          showToast(`✔ Saved successfully! Moved to next tab: ${TAB_LABELS[nextTab]}`, 'success');
+        } else {
+          showToast(`✔ All sections completed & saved for ${formData.fullName || savedEnr}!`, 'success');
+        }
+      } else {
+        showToast(`✔ ${formData.fullName || savedEnr} details successfully updated in ERP Database!`, 'success');
+      }
     } catch (err) {
       console.error('Save error:', err);
       // Fallback: only update session if this is the currently logged-in student
@@ -678,9 +694,16 @@ export default function AdminEditorModal({
         if (onStudentUpdated) {
           onStudentUpdated(formData);
         }
+        sessionStorage.setItem('svsu_student_profile', JSON.stringify(formData));
         localStorage.setItem('svsu_student_profile', JSON.stringify(formData));
       }
-      showToast(`✔ Updated locally and in active session! (${err.message})`, 'success');
+      showToast(`✔ Saved locally! (${err.message})`, 'success');
+      if (advanceTab) {
+        const curIdx = TAB_SEQUENCE.indexOf(activeTab);
+        if (curIdx >= 0 && curIdx < TAB_SEQUENCE.length - 1) {
+          setActiveTab(TAB_SEQUENCE[curIdx + 1]);
+        }
+      }
     } finally {
       setIsSaving(false);
     }
@@ -737,12 +760,22 @@ export default function AdminEditorModal({
               {isFullScreen ? '🗗 Windowed' : '⛶ Full Screen'}
             </button>
             <button
+              type="button"
               className="admin-btn-save"
-              onClick={handleSaveAll}
+              style={{ background: '#2563eb' }}
+              onClick={() => handleSaveAll(true)}
+              disabled={isSaving}
+              title="Save data and move directly to next section"
+            >
+              {isSaving ? 'Saving...' : '💾 Save & Next Tab ➡'}
+            </button>
+            <button
+              className="admin-btn-save"
+              onClick={() => handleSaveAll(false)}
               disabled={isSaving}
               title="Save all changes to backend & refresh portal"
             >
-              {isSaving ? 'Saving...' : '💾 Save All Changes'}
+              {isSaving ? 'Saving...' : '💾 Save All'}
             </button>
             <button
               type="button"
@@ -1947,15 +1980,24 @@ export default function AdminEditorModal({
         {/* Modal Footer */}
         <div className="admin-modal-footer">
           <div className="admin-footer-left">
-            <span>Editing Student: <strong>{formData.fullName}</strong> ({formData.enrollmentNo})</span>
+            <span>Editing Student: <strong>{formData.fullName || 'New Candidate'}</strong> ({formData.enrollmentNo})</span>
           </div>
           <div className="admin-footer-right">
             <button className="btn-cancel" onClick={onClose}>
               Close
             </button>
             <button
+              type="button"
               className="admin-btn-save"
-              onClick={handleSaveAll}
+              style={{ background: '#2563eb' }}
+              onClick={() => handleSaveAll(true)}
+              disabled={isSaving}
+            >
+              {isSaving ? 'Saving...' : '💾 Save & Continue to Next Tab ➡'}
+            </button>
+            <button
+              className="admin-btn-save"
+              onClick={() => handleSaveAll(false)}
               disabled={isSaving}
             >
               {isSaving ? 'Saving...' : '💾 Save All Changes'}

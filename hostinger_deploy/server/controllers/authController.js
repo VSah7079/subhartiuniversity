@@ -162,9 +162,24 @@ const studentLogin = async (req, res) => {
  */
 const getStudentProfile = async (req, res) => {
   try {
+    const student = req.student;
+    const studentObj = student.toObject ? student.toObject() : JSON.parse(JSON.stringify(student));
+    delete studentObj.password;
+    delete studentObj.__v;
+
+    studentObj.id = studentObj._id || studentObj.enrollmentNo;
+    studentObj.photoUrl = studentObj.photoUrl || '';
+    studentObj.fatherName = studentObj.fatherName || '';
+    studentObj.motherName = studentObj.motherName || '';
+    studentObj.results = Array.isArray(studentObj.results) ? studentObj.results : [];
+    studentObj.feeTransactions = Array.isArray(studentObj.feeTransactions) ? studentObj.feeTransactions : [];
+    studentObj.examSchedule = Array.isArray(studentObj.examSchedule) ? studentObj.examSchedule : [];
+    studentObj.subjectsAttendance = Array.isArray(studentObj.subjectsAttendance) ? studentObj.subjectsAttendance : [];
+    studentObj.notices = Array.isArray(studentObj.notices) ? studentObj.notices : [];
+
     return res.status(200).json({
       success: true,
-      student: req.student
+      student: studentObj
     });
   } catch (error) {
     return res.status(500).json({

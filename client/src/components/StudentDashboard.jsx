@@ -98,8 +98,9 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
 
     const hasSubjects = existing && Array.isArray(existing.subjects) && existing.subjects.length > 0;
     const hasExplicitMarks = existing && (existing.marks || existing.marksObtained);
-    const isExplicitlyPublished = existing ? existing.isPublished !== false : false;
-    const isUploaded = !!(existing && isExplicitlyPublished && (hasSubjects || hasExplicitMarks));
+    // Any marksheet with subjects or marks uploaded by admin is immediately visible and downloadable by the student
+    const isExplicitlyHidden = existing && existing.isPublished === false && !hasSubjects && !hasExplicitMarks;
+    const isUploaded = !!(existing && !isExplicitlyHidden && (hasSubjects || hasExplicitMarks));
 
     if (isUploaded) {
       const subs = existing.subjects || [];
