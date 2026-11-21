@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 
-export default function LoginForm({ onLoginSuccess, onSwitchUser, showToast, onOpenAdmin }) {
+export default function LoginForm({ onLoginSuccess, onSwitchUser, showToast }) {
   const [loginOption, setLoginOption] = useState('enrollment');
   const [identifier, setIdentifier] = useState('');
   const [dob, setDob] = useState('');
@@ -241,15 +241,6 @@ export default function LoginForm({ onLoginSuccess, onSwitchUser, showToast, onO
               onClick={onSwitchUser}
             >
               Switch User
-            </button>
-            <span style={{ color: '#94a3b8', margin: '0 6px', fontSize: '12px' }}>•</span>
-            <button
-              type="button"
-              className="same-switch-user-link admin-editor-link"
-              onClick={onOpenAdmin}
-              title="Open SVSU ERP Master Data Editor to edit student details"
-            >
-              ⚙️ Admin & Data Editor
             </button>
           </div>
         </form>

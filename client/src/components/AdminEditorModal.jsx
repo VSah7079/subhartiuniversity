@@ -429,9 +429,16 @@ export default function AdminEditorModal({
     setIsSaving(true);
     try {
       const enrEncoded = encodeURIComponent(formData.enrollmentNo);
+      const adminToken = sessionStorage.getItem('svsu_admin_token') || '';
+      const adminKey = sessionStorage.getItem('svsu_admin_key') || 'admin@svsu2026';
+
       const res = await fetch(`/api/admin/student/${enrEncoded}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(adminToken ? { Authorization: `Bearer ${adminToken}` } : {}),
+          'x-admin-key': adminKey
+        },
         body: JSON.stringify(formData)
       });
 

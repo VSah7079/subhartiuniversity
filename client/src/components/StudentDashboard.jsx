@@ -8,7 +8,7 @@ import {
   downloadNotice
 } from '../utils/documentGenerator.js';
 
-export default function StudentDashboard({ student, onLogout, showToast, onOpenAdmin }) {
+export default function StudentDashboard({ student, onLogout, showToast }) {
   // Navigation active tab: 'dashboard' | 'profile' | 'documents' | 'fees' | 'attendance' | 'examination' | 'results' | 'notices'
   const [activeTab, setActiveTab] = useState('dashboard');
   
@@ -163,9 +163,6 @@ export default function StudentDashboard({ student, onLogout, showToast, onOpenA
               <span>{student.enrollmentNo}</span>
             </div>
           </div>
-          <button className="erp-admin-btn" onClick={onOpenAdmin} title="Open Master ERP Data Editor to change student details">
-            <span>⚙️ Edit ERP Data</span>
-          </button>
           <button className="erp-logout-btn" onClick={onLogout} title="Sign Out of Session">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

@@ -3,11 +3,13 @@ import LoginForm from './components/LoginForm.jsx';
 import SwitchUserModal from './components/SwitchUserModal.jsx';
 import StudentDashboard from './components/StudentDashboard.jsx';
 import AdminEditorModal from './components/AdminEditorModal.jsx';
+import AdminAuthModal from './components/AdminAuthModal.jsx';
 
 export default function App() {
   const [student, setStudent] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('svsu_token') || null);
   const [isSwitchUserOpen, setIsSwitchUserOpen] = useState(false);
+  const [isAdminAuthOpen, setIsAdminAuthOpen] = useState(false);
   const [isAdminEditorOpen, setIsAdminEditorOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
 
@@ -19,6 +21,18 @@ export default function App() {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 4000);
   };
+
+  // Keyboard shortcut: Ctrl + Shift + A opens Master Admin Verification
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        setIsAdminAuthOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Restore saved session if present
   useEffect(() => {
@@ -54,8 +68,7 @@ export default function App() {
     if (role === 'faculty') {
       showToast('Faculty & Staff Login Portal: Use employee credentials.', 'info');
     } else if (role === 'admin') {
-      setIsAdminEditorOpen(true);
-      showToast('ERP Administration & Data Editor opened.', 'info');
+      setIsAdminAuthOpen(true);
     }
   };
 
@@ -71,12 +84,11 @@ export default function App() {
   return (
     <div className={`app-root ${student ? 'app-in-erp' : 'app-in-login'}`}>
       {student ? (
-        /* Authenticated Full ERP Student Dashboard Suite */
+        /* Authenticated Full ERP Student Dashboard Suite (STRICTLY READ-ONLY FOR STUDENTS) */
         <StudentDashboard
           student={student}
           onLogout={handleLogout}
           showToast={showToast}
-          onOpenAdmin={() => setIsAdminEditorOpen(true)}
         />
       ) : (
         /* Exact SVSU Student Login Form matching user's photo */
@@ -84,7 +96,6 @@ export default function App() {
           onLoginSuccess={handleLoginSuccess}
           onSwitchUser={() => setIsSwitchUserOpen(true)}
           showToast={showToast}
-          onOpenAdmin={() => setIsAdminEditorOpen(true)}
         />
       )}
 
@@ -95,7 +106,17 @@ export default function App() {
         onSelectRole={handleSelectRole}
       />
 
-      {/* Master ERP Administration & Data Editor Modal */}
+      {/* Admin Passcode Verification Modal */}
+      <AdminAuthModal
+        isOpen={isAdminAuthOpen}
+        onClose={() => setIsAdminAuthOpen(false)}
+        onSuccess={() => {
+          setIsAdminEditorOpen(true);
+        }}
+        showToast={showToast}
+      />
+
+      {/* Master ERP Administration & Data Editor Modal (Restricted to Authorized Admins) */}
       <AdminEditorModal
         isOpen={isAdminEditorOpen}
         onClose={() => setIsAdminEditorOpen(false)}
