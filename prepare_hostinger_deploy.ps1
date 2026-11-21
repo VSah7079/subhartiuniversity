@@ -1,32 +1,32 @@
-﻿$ProgressPreference = 'SilentlyContinue'
+$ProgressPreference = 'SilentlyContinue'
 
-Write-Host "=======================================================" -ForegroundColor Cyan
-Write-Host "📦 Packaging SVSU ERP Portal for Hostinger Production..." -ForegroundColor Green
-Write-Host "=======================================================" -ForegroundColor Cyan
+Write-Host '======================================================='
+Write-Host 'Packaging SVSU ERP Portal for Hostinger Production...'
+Write-Host '======================================================='
 
 # 1. Build Client
-Write-Host "[1/3] Building Production Client Assets..." -ForegroundColor Yellow
+Write-Host '[1/3] Building Production Client Assets...'
 npm --prefix client run build
 
 # 2. Prepare Deploy Directory
-$DeployDir = "hostinger_deploy"
+$DeployDir = 'hostinger_deploy'
 if (Test-Path $DeployDir) {
     Remove-Item -Recurse -Force $DeployDir
 }
 New-Item -ItemType Directory -Path $DeployDir | Out-Null
 
-Write-Host "[2/3] Copying Production Files..." -ForegroundColor Yellow
+Write-Host '[2/3] Copying Production Files...'
 
 # Copy root entry files
-Copy-Item "index.js" -Destination $DeployDir
-Copy-Item "server.js" -Destination $DeployDir
-Copy-Item "package.json" -Destination $DeployDir
-Copy-Item ".htaccess" -Destination $DeployDir
-Copy-Item "ecosystem.config.js" -Destination $DeployDir
-Copy-Item ".env.production.example" -Destination (Join-Path $DeployDir ".env")
+Copy-Item 'index.js' -Destination $DeployDir
+Copy-Item 'server.js' -Destination $DeployDir
+Copy-Item 'package.json' -Destination $DeployDir
+Copy-Item '.htaccess' -Destination $DeployDir
+Copy-Item 'ecosystem.config.js' -Destination $DeployDir
+Copy-Item '.env.production.example' -Destination (Join-Path $DeployDir '.env')
 
 # Copy server without node_modules
-New-Item -ItemType Directory -Path (Join-Path $DeployDir "server") | Out-Null
+New-Item -ItemType Directory -Path (Join-Path $DeployDir 'server') | Out-Null
 Copy-Item -Recurse 'server/config' (Join-Path $DeployDir 'server/config')
 Copy-Item -Recurse 'server/controllers' (Join-Path $DeployDir 'server/controllers')
 Copy-Item -Recurse 'server/middleware' (Join-Path $DeployDir 'server/middleware')

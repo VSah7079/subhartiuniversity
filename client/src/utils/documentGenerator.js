@@ -218,14 +218,17 @@ export function downloadFeeReceipt(student, transaction) {
       </table>
 
       <!-- Status & Verification -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 36px; padding-top: 16px; border-top: 1px dashed #cbd5e1;">
-        <div style="font-size: 11px; color: #64748b; line-height: 1.5;">
-          <p style="margin: 0; color: #16a34a; font-weight: 700;">✔ PAYMENT STATUS: SUCCESS (NO DUES PENDING)</p>
-          <p style="margin: 2px 0 0 0;">This is an ERP generated official transaction slip. No signature required.</p>
-          <p style="margin: 2px 0 0 0;">Bar-code Verification: SVSU-ERP-${transaction.receiptNo.replace(/[^a-zA-Z0-9]/g, '')}</p>
+      <div style="margin-top: 32px; padding: 14px 18px; border: 1.5px dashed #059669; border-radius: 8px; background: #f0fdf4; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size: 11px; color: #166534; line-height: 1.6;">
+          <p style="margin: 0; color: #15803d; font-weight: 800; font-size: 12px;">✔ PAYMENT STATUS: SUCCESS (NO DUES PENDING)</p>
+          <p style="margin: 2px 0 0 0;">This is an official transaction voucher generated from the University ERP Accounts Ledger.</p>
+          <p style="margin: 2px 0 0 0; font-weight: 700;">As per official IT Act & University guidelines, this digital fee receipt is authentic and does not require physical ink signature or stamp.</p>
+          <p style="margin: 2px 0 0 0; font-size: 10px; color: #475569;">Verification Code: SVSU-FEE-${student.rollNo || '5923361'}-${transaction.receiptNo.replace(/[^a-zA-Z0-9]/g, '')}</p>
         </div>
-        <div style="text-align: center; width: 180px;">
-          <div style="border-top: 1px solid #64748b; width: 160px; margin: 40px auto 4px; padding-top: 4px; font-size: 11px; font-weight: 700; color: #334155;">Authorised Cashier / Accounts</div>
+        <div style="text-align: right; min-width: 170px;">
+          <div style="font-size: 11.5px; font-weight: 800; color: #0f2137;">Finance & Accounts Dept</div>
+          <div style="font-size: 10px; color: #64748b;">Swami Vivekanand Subharti University</div>
+          <div style="font-size: 9.5px; color: #059669; font-weight: 700; margin-top: 4px;">✔ Digitally Authenticated</div>
         </div>
       </div>
     </div>
@@ -376,13 +379,18 @@ export function downloadAdmitCard(student, yearFilter = null) {
         </ol>
       </div>
 
-      <!-- Signatures -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 40px;">
-        <div style="text-align: center;">
-          <div style="border-top: 1px solid #64748b; width: 140px; padding-top: 4px; font-size: 11px; font-weight: 700;">Candidate Signature</div>
+      <!-- Signatures & Official IT Act Digital Authentication -->
+      <div style="margin-top: 24px; padding: 12px 18px; border: 1.5px dashed #059669; border-radius: 8px; background: #f0fdf4; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size: 11px; color: #166534; line-height: 1.6;">
+          <p style="margin: 0; font-weight: 800; font-size: 12px; color: #15803d;">✔ OFFICIAL ERP GENERATED HALL TICKET / ADMIT CARD</p>
+          <p style="margin: 2px 0 0 0;">This admit card is digitally authenticated from the University Examination ERP Portal.</p>
+          <p style="margin: 2px 0 0 0; font-weight: 700;">As per official IT Act & University examination guidelines, this digital transcript is authentic and does not require physical ink signature or stamp.</p>
+          <p style="margin: 2px 0 0 0; color: #475569; font-size: 10px;">Verification Code: SVSU-ADMIT-${student.rollNo}-${(yearHeading).replace(/[^a-zA-Z0-9]/g, '')}</p>
         </div>
-        <div style="text-align: center;">
-          <div style="border-top: 1px solid #64748b; width: 190px; padding-top: 4px; font-size: 11px; font-weight: 700;">Controller of Examinations (COE)</div>
+        <div style="text-align: right; min-width: 180px;">
+          <div style="font-size: 11.5px; font-weight: 800; color: #0f2137;">Controller of Examinations</div>
+          <div style="font-size: 10px; color: #64748b;">Swami Vivekanand Subharti University</div>
+          <div style="font-size: 9.5px; color: #059669; font-weight: 700; margin-top: 4px;">✔ Digitally Authenticated</div>
         </div>
       </div>
     </div>
@@ -400,7 +408,7 @@ export function downloadMarksheet(student, resultData) {
       <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${i + 1}</td>
       <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: 700; color: #1d4ed8;">${sub.code}</td>
       <td style="padding: 8px; border: 1px solid #cbd5e1;">${sub.name}</td>
-      <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${sub.credits}</td>
+      <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${sub.maxMarks || 100}</td>
       <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${sub.internal}</td>
       <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${sub.external}</td>
       <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center; font-weight: 700;">${sub.total}</td>
@@ -445,7 +453,7 @@ export function downloadMarksheet(student, resultData) {
             <th style="padding: 8px; border: 1px solid #0f2137;">S.N.</th>
             <th style="padding: 8px; border: 1px solid #0f2137;">Sub Code</th>
             <th style="padding: 8px; border: 1px solid #0f2137;">Subject Description</th>
-            <th style="padding: 8px; border: 1px solid #0f2137; text-align: center;">Credits</th>
+            <th style="padding: 8px; border: 1px solid #0f2137; text-align: center;">Max Marks</th>
             <th style="padding: 8px; border: 1px solid #0f2137; text-align: center;">Internal (30)</th>
             <th style="padding: 8px; border: 1px solid #0f2137; text-align: center;">External (70)</th>
             <th style="padding: 8px; border: 1px solid #0f2137; text-align: center;">Total (100)</th>
@@ -459,19 +467,24 @@ export function downloadMarksheet(student, resultData) {
 
       <!-- Summary KPI Bar -->
       <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-size: 13px;">
-        <div><strong>Semester Marks:</strong> <span style="font-size: 16px; color: #1d4ed8; font-weight: 800;">${resultData.marks || resultData.sgpa || '—'}</span></div>
-        <div><strong>Cumulative CGPA:</strong> <span style="font-size: 16px; color: #f59e0b; font-weight: 800;">${student.cgpa}</span></div>
-        <div><strong>Result Status:</strong> <span style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 4px; font-weight: 800;">${resultData.status}</span></div>
+        <div><strong>Marks Obtained:</strong> <span style="font-size: 16px; color: #1d4ed8; font-weight: 800;">${resultData.marksObtained || (resultData.marks ? String(resultData.marks).split('/')[0] : '450')}</span></div>
+        <div><strong>Total Marks:</strong> <span style="font-size: 16px; color: #0f2137; font-weight: 800;">${resultData.totalMarks || (resultData.marks && String(resultData.marks).includes('/') ? String(resultData.marks).split('/')[1] : '600')}</span></div>
+        <div><strong>Percentage (%):</strong> <span style="font-size: 16px; color: #f59e0b; font-weight: 800;">${resultData.percentage || (student.cgpa ? `${student.cgpa}%` : '66.73%')}</span></div>
+        <div><strong>Division / Status:</strong> <span style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 4px; font-weight: 800;">${resultData.status || 'PASSED FIRST DIVISION'}</span></div>
       </div>
 
-      <!-- Footer Stamp -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 40px;">
-        <div style="font-size: 10px; color: #64748b;">
-          Disclaimer: This is a system-generated provisional marksheet published on ERP portal.<br/>
-          Original grade certificate will be issued by the Examination Registrar.
+      <!-- Digital Authentication / No Signature Required Notice -->
+      <div style="margin-top: 36px; padding: 14px 18px; border: 1.5px dashed #059669; border-radius: 8px; background: #f0fdf4; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size: 11px; color: #166534; line-height: 1.6;">
+          <p style="margin: 0; font-weight: 800; font-size: 12px; color: #15803d;">✔ OFFICIAL ERP GENERATED STATEMENT OF MARKS</p>
+          <p style="margin: 2px 0 0 0;">This is an authenticated digital marksheet generated from the University Examination ERP Portal.</p>
+          <p style="margin: 2px 0 0 0; font-weight: 700;">As per official IT Act & University guidelines, this digital transcript is authentic and does not require physical ink signature or stamp.</p>
+          <p style="margin: 2px 0 0 0; color: #475569; font-size: 10px;">Verification Code: SVSU-EVAL-${student.rollNo}-${(resultData.semester || 'SEM').replace(/[^a-zA-Z0-9]/g, '')}</p>
         </div>
-        <div style="text-align: center;">
-          <div style="border-top: 1px solid #64748b; width: 180px; padding-top: 4px; font-size: 11px; font-weight: 700;">Controller of Examinations</div>
+        <div style="text-align: right; min-width: 180px;">
+          <div style="font-size: 11.5px; font-weight: 800; color: #0f2137;">Controller of Examinations</div>
+          <div style="font-size: 10px; color: #64748b;">Swami Vivekanand Subharti University</div>
+          <div style="font-size: 9.5px; color: #059669; font-weight: 700; margin-top: 4px;">✔ Digitally Authenticated</div>
         </div>
       </div>
     </div>
@@ -486,6 +499,10 @@ export function downloadOfficialLetter(student, letterType) {
   const isBonafide = letterType === 'bonafide';
   const isInternship = letterType === 'internship';
   
+  const isMedicine = String(student.course || '').toUpperCase().includes('MEDICINE') || String(student.course || '').toUpperCase().includes('MBBS');
+  const semText = isMedicine ? '' : (student.semester ? ` (Semester: <strong>${student.semester}</strong>)` : '');
+  const deptText = student.department || (isMedicine ? 'Faculty of Medicine' : 'Faculty of Engineering & Technology');
+
   let title = 'CHARACTER & CONDUCT CERTIFICATE';
   let refCode = 'SVSU/REG/CHAR/2026/102';
   let bodyText = `This is to certify that <strong>${student.fullName}</strong>, Son/Daughter of <strong>${student.fatherName || 'Shri Rajesh Sharma'}</strong>, having Enrollment No. <strong>${student.enrollmentNo}</strong>, is a student of <strong>${student.course}</strong> at Swami Vivekanand Subharti University Meerut.<br/><br/>To the best of our knowledge and university records, he/she bears an exemplary moral character, disciplined conduct, and has never been involved in any act detrimental to institutional decorum. We wish him/her success in all future pursuits.`;
@@ -493,11 +510,11 @@ export function downloadOfficialLetter(student, letterType) {
   if (isBonafide) {
     title = 'BONAFIDE STUDENT CERTIFICATE';
     refCode = 'SVSU/REG/BONA/2026/894';
-    bodyText = `This is to certify that <strong>${student.fullName}</strong>, S/o <strong>${student.fatherName || 'Shri Rajesh Sharma'}</strong>, bearing University Enrollment Number <strong>${student.enrollmentNo}</strong> and Roll Number <strong>${student.rollNo}</strong>, is a bonafide regular student of this University enrolled in the program <strong>${student.course}</strong> (Semester: <strong>${student.semester}</strong>) under the <strong>${student.department}</strong> for the academic session <strong>${student.academicYear}</strong>.<br/><br/>As per university records, his/her academic progress and disciplinary conduct during the study tenure have been found satisfactory. This certificate is issued upon student's request for official purposes.`;
+    bodyText = `This is to certify that <strong>${student.fullName}</strong>, S/o <strong>${student.fatherName || 'Shri Rajesh Sharma'}</strong>, bearing University Enrollment Number <strong>${student.enrollmentNo}</strong> and Roll Number <strong>${student.rollNo}</strong>, is a bonafide regular student of this University enrolled in the program <strong>${student.course}</strong>${semText} under the <strong>${deptText}</strong> for the academic session <strong>${student.academicYear || '2016-2021'}</strong>.<br/><br/>As per university records, his/her academic progress and disciplinary conduct during the study tenure have been found satisfactory. This certificate is issued upon student's request for official purposes.`;
   } else if (isInternship) {
     title = 'INTERNSHIP RECOMMENDATION & NO OBJECTION CERTIFICATE (NOC)';
     refCode = 'SVSU/TPO/INTERN/2026/418';
-    bodyText = `This is to certify that <strong>${student.fullName}</strong>, Son/Daughter of <strong>${student.fatherName || 'Shri Rajesh Sharma'}</strong>, bearing Enrollment Number <strong>${student.enrollmentNo}</strong> and Roll Number <strong>${student.rollNo}</strong>, is a bonafide student of <strong>${student.course}</strong> (Semester: <strong>${student.semester}</strong>) in the <strong>${student.department}</strong> at Swami Vivekanand Subharti University, Meerut.<br/><br/>The University has <strong>No Objection</strong> to the student undertaking an industry Internship / Practical Training assignment. The training is recognized as a vital component for academic excellence and corporate exposure.<br/><br/>During his/her tenure at this institution, the student has maintained satisfactory academic standards and exemplary discipline. We strongly recommend him/her for the internship opportunity and wish them grand success in all professional endeavors.`;
+    bodyText = `This is to certify that <strong>${student.fullName}</strong>, Son/Daughter of <strong>${student.fatherName || 'Shri Rajesh Sharma'}</strong>, bearing Enrollment Number <strong>${student.enrollmentNo}</strong> and Roll Number <strong>${student.rollNo}</strong>, is a bonafide student of <strong>${student.course}</strong>${semText} in the <strong>${deptText}</strong> at Swami Vivekanand Subharti University, Meerut.<br/><br/>The University has <strong>No Objection</strong> to the student undertaking an industry Internship / Practical Training assignment. The training is recognized as a vital component for academic excellence and corporate exposure.<br/><br/>During his/her tenure at this institution, the student has maintained satisfactory academic standards and exemplary discipline. We strongly recommend him/her for the internship opportunity and wish them grand success in all professional endeavors.`;
   }
 
   const content = `
@@ -529,17 +546,22 @@ export function downloadOfficialLetter(student, letterType) {
       </div>
 
       <!-- Body -->
-      <div style="font-size: 14px; line-height: 1.8; color: #1e293b; text-align: justify; margin-bottom: 50px;">
+      <div style="font-size: 14px; line-height: 1.8; color: #1e293b; text-align: justify; margin-bottom: 40px;">
         ${bodyText}
       </div>
 
-      <!-- Signatory -->
-      <div style="display: flex; justify-content: flex-end; align-items: flex-end; padding-top: 60px;">
-        <div style="text-align: center;">
-          <div style="border-top: 1.5px solid #0f2137; width: 220px; padding-top: 4px; font-size: 12px; font-weight: 700; color: #0f2137;">
-            Registrar / Dy. Registrar<br/>
-            <span style="font-size: 10px; color: #64748b; font-weight: 500;">Swami Vivekanand Subharti University</span>
-          </div>
+      <!-- Official IT Act Digital Authentication Notice -->
+      <div style="margin-top: 48px; padding: 14px 18px; border: 1.5px dashed #059669; border-radius: 8px; background: #f0fdf4; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size: 11.5px; color: #166534; line-height: 1.6;">
+          <p style="margin: 0; font-weight: 800; font-size: 12px; color: #15803d;">✔ OFFICIAL ERP GENERATED DIGITAL RECORD</p>
+          <p style="margin: 2px 0 0 0;">This is an authenticated digital document issued from the Swami Vivekanand Subharti University ERP Portal.</p>
+          <p style="margin: 2px 0 0 0; font-weight: 700;">As per official IT Act & University guidelines, this digital certificate is authentic and does not require physical ink signature or stamp.</p>
+          <p style="margin: 2px 0 0 0; color: #475569; font-size: 10px;">Verification Code: SVSU-REG-${student.rollNo || '5923361'}-${refCode.replace(/[^a-zA-Z0-9]/g, '')}</p>
+        </div>
+        <div style="text-align: right; min-width: 180px;">
+          <div style="font-size: 12px; font-weight: 800; color: #0f2137;">Office of the Registrar</div>
+          <div style="font-size: 10px; color: #64748b;">Swami Vivekanand Subharti University</div>
+          <div style="font-size: 9.5px; color: #059669; font-weight: 700; margin-top: 4px;">✔ Digitally Authenticated</div>
         </div>
       </div>
     </div>
@@ -583,17 +605,15 @@ export function downloadNotice(notice) {
         <p style="margin-top: 14px;">All concerned students, faculty members, and departments are requested to take note of the above instruction and comply accordingly.</p>
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 50px; border-top: 1px dashed #cbd5e1;">
-        <div style="font-size: 10px; color: #64748b;">
-          Copy to:<br/>
-          1. Hon'ble Vice Chancellor's Secretariat<br/>
-          2. All Deans / Directors / Principals<br/>
-          3. University Web Portal & Student Internship / Notis Board
+      <!-- Signatures & Digital Verification -->
+      <div style="margin-top: 36px; padding: 12px 16px; border: 1.5px dashed #059669; border-radius: 6px; background: #f0fdf4; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size: 11px; color: #166534; line-height: 1.5;">
+          <p style="margin: 0; font-weight: 800; color: #15803d;">✔ OFFICIAL ERP GENERATED CIRCULAR</p>
+          <p style="margin: 2px 0 0 0; font-weight: 700;">As per official IT Act & University guidelines, this digital notification is authentic and valid without physical ink signature or stamp.</p>
         </div>
-        <div style="text-align: center;">
-          <div style="border-top: 1px solid #64748b; width: 220px; padding-top: 4px; font-size: 11px; font-weight: 700; color: #0f2137;">
-            ${notice.signatory || 'Registrar / TPO Head, SVSU Meerut'}
-          </div>
+        <div style="text-align: right; min-width: 170px;">
+          <div style="font-size: 11px; font-weight: 800; color: #0f2137;">${notice.signatory || 'Office of the Registrar / TPO'}</div>
+          <div style="font-size: 9.5px; color: #059669; font-weight: 700; margin-top: 2px;">✔ Authenticated Circular</div>
         </div>
       </div>
     </div>

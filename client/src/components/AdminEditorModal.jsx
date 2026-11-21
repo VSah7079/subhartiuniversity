@@ -1,4 +1,95 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { downloadMarksheet } from '../utils/documentGenerator';
+
+export const DEFAULT_FOUR_YEAR_RESULTS = [
+  {
+    semester: 'Year 1',
+    examSession: 'June 2017',
+    marks: '450/600',
+    percentage: '75.00%',
+    sgpa: '450/600',
+    totalCredits: 20,
+    status: 'PASSED FIRST DIVISION',
+    subjects: [
+      { code: 'MBBS-1', name: 'ANATOMY', credits: 4, internal: 27, external: 60, total: 87, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-2', name: 'PHYSIOLOGY', credits: 4, internal: 25, external: 60, total: 85, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-3', name: 'BIOCHEMISTRY', credits: 4, internal: 26, external: 61, total: 87, grade: 'A+', remarks: 'Passed' }
+    ]
+  },
+  {
+    semester: 'Year 2',
+    examSession: 'June 2018',
+    marks: '540/700',
+    percentage: '77.14%',
+    sgpa: '540/700',
+    totalCredits: 22,
+    status: 'PASSED FIRST DIVISION',
+    subjects: [
+      { code: 'MBBS-1', name: 'PHARMACOLOGY', credits: 4, internal: 26, external: 62, total: 88, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-2', name: 'MICROBIOLOGY', credits: 4, internal: 25, external: 60, total: 85, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-3', name: 'PATHOLOGY', credits: 4, internal: 28, external: 64, total: 92, grade: 'O', remarks: 'Passed' },
+      { code: 'MBBS-4', name: 'FMT', credits: 4, internal: 27, external: 61, total: 88, grade: 'A+', remarks: 'Passed' }
+    ]
+  },
+  {
+    semester: 'Year 3',
+    examSession: 'Dec 2019',
+    marks: '520/700',
+    percentage: '74.28%',
+    sgpa: '520/700',
+    totalCredits: 22,
+    status: 'PASSED FIRST DIVISION',
+    subjects: [
+      { code: 'MBBS-1', name: 'ENT', credits: 4, internal: 27, external: 60, total: 87, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-2', name: 'OPHTHALMOLOGY', credits: 4, internal: 26, external: 59, total: 85, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-3', name: 'SPM', credits: 4, internal: 25, external: 61, total: 86, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-4', name: 'OPD CLINICAL', credits: 4, internal: 28, external: 63, total: 91, grade: 'O', remarks: 'Passed' }
+    ]
+  },
+  {
+    semester: 'Year 4',
+    examSession: 'Dec 2020',
+    marks: '550/700',
+    percentage: '78.57%',
+    sgpa: '550/700',
+    totalCredits: 24,
+    status: 'PASSED WITH DISTINCTION',
+    subjects: [
+      { code: 'MBBS-1', name: 'MEDICINE', credits: 4, internal: 28, external: 64, total: 92, grade: 'O', remarks: 'Passed' },
+      { code: 'MBBS-2', name: 'SURGERY', credits: 4, internal: 27, external: 62, total: 89, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-3', name: 'OBS/GYN', credits: 4, internal: 26, external: 60, total: 86, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-4', name: 'PEDIATRICS', credits: 4, internal: 28, external: 63, total: 91, grade: 'O', remarks: 'Passed' }
+    ]
+  }
+];
+
+export function normalizeResultsForFourYears(results = []) {
+  return ['Year 1', 'Year 2', 'Year 3', 'Year 4'].map((yr, idx) => {
+    const existing = (results || []).find((r) => {
+      const s = String(r.semester || '').toLowerCase();
+      return s.includes(yr.toLowerCase()) || s.includes(`semester ${idx + 1}`) || s === `semester ${idx + 1}` || s.includes(`sem ${idx + 1}`);
+    });
+    if (existing) {
+      const isCseDummy = existing.subjects && existing.subjects.length > 0 && existing.subjects[0].code && existing.subjects[0].code.startsWith('CSE');
+      return {
+        ...DEFAULT_FOUR_YEAR_RESULTS[idx],
+        ...existing,
+        semester: yr,
+        marks: existing.marks || existing.sgpa || DEFAULT_FOUR_YEAR_RESULTS[idx].marks,
+        percentage: existing.percentage || DEFAULT_FOUR_YEAR_RESULTS[idx].percentage,
+        subjects: isCseDummy ? DEFAULT_FOUR_YEAR_RESULTS[idx].subjects : (existing.subjects && existing.subjects.length > 0 ? existing.subjects : DEFAULT_FOUR_YEAR_RESULTS[idx].subjects)
+      };
+    }
+    return JSON.parse(JSON.stringify(DEFAULT_FOUR_YEAR_RESULTS[idx]));
+  });
+}
+
+const withNormalizedResults = (studentObj) => {
+  if (!studentObj) return studentObj;
+  const copy = JSON.parse(JSON.stringify(studentObj));
+  copy.results = normalizeResultsForFourYears(copy.results);
+  return copy;
+};
 
 const DEFAULT_STUDENT_TEMPLATE = {
   enrollmentNo: 'SVSU/2023/10892',
@@ -89,10 +180,13 @@ export default function AdminEditorModal({
   );
 
   // Form State holding the entire student object being edited (guaranteed never null)
+  const [selectedResultYearIndex, setSelectedResultYearIndex] = useState(0);
   const [formData, setFormData] = useState(() => {
-    return currentStudent
-      ? JSON.parse(JSON.stringify(currentStudent))
-      : JSON.parse(JSON.stringify(DEFAULT_STUDENT_TEMPLATE));
+    return withNormalizedResults(
+      currentStudent
+        ? JSON.parse(JSON.stringify(currentStudent))
+        : JSON.parse(JSON.stringify(DEFAULT_STUDENT_TEMPLATE))
+    );
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -103,7 +197,7 @@ export default function AdminEditorModal({
   useEffect(() => {
     if (isOpen) {
       if (currentStudent) {
-        setFormData(JSON.parse(JSON.stringify(currentStudent)));
+        setFormData(withNormalizedResults(currentStudent));
         setSelectedEnrollment(currentStudent.enrollmentNo);
       }
       fetchStudents();
@@ -132,14 +226,14 @@ export default function AdminEditorModal({
         const activeStudent = data.students.find(
           (s) => s.enrollmentNo.toLowerCase() === activeEnr.toLowerCase()
         ) || data.students[0];
-        setFormData(JSON.parse(JSON.stringify(activeStudent)));
+        setFormData(withNormalizedResults(activeStudent));
       } else if (currentStudent) {
-        setFormData(JSON.parse(JSON.stringify(currentStudent)));
+        setFormData(withNormalizedResults(currentStudent));
       }
     } catch (err) {
       console.warn('Failed to fetch from /api/admin/students, using active student', err);
       if (currentStudent) {
-        setFormData(JSON.parse(JSON.stringify(currentStudent)));
+        setFormData(withNormalizedResults(currentStudent));
       }
     } finally {
       setIsLoading(false);
@@ -153,7 +247,7 @@ export default function AdminEditorModal({
     setSelectedEnrollment(enr);
     const target = studentList.find((s) => s.enrollmentNo === enr);
     if (target) {
-      setFormData(JSON.parse(JSON.stringify(target)));
+      setFormData(withNormalizedResults(target));
     }
   };
 
@@ -338,30 +432,26 @@ export default function AdminEditorModal({
     setFormData((prev) => ({ ...prev, examSchedule: list }));
   };
 
-  // 4. Results & Marks
-  const currentResult = (formData?.results && formData.results.length > 0) ? formData.results[0] : null;
+  // 4. Results & Marks (Supports 4 Academic Years: Year 1 to Year 4)
+  const currentResult = (formData?.results && formData.results[selectedResultYearIndex])
+    ? formData.results[selectedResultYearIndex]
+    : DEFAULT_FOUR_YEAR_RESULTS[selectedResultYearIndex];
 
   const handleResultMetaChange = (field, value) => {
-    const results = [...(formData.results || [])];
-    if (results.length === 0) {
-      results.push({
-        semester: 'Semester 4',
-        examSession: 'June 2026',
-        sgpa: 8.5,
-        totalCredits: 24,
-        status: 'PASSED WITH DISTINCTION',
-        subjects: []
-      });
+    const results = normalizeResultsForFourYears(formData.results);
+    results[selectedResultYearIndex][field] = value;
+    if (field === 'marks') {
+      results[selectedResultYearIndex].sgpa = value; // compatibility
     }
-    results[0][field] = value;
     setFormData((prev) => ({ ...prev, results }));
   };
 
   const handleResultSubjectChange = (subIndex, field, value) => {
-    const results = [...(formData.results || [])];
-    if (!results[0]) return;
-    const subjects = [...results[0].subjects];
-    subjects[subIndex][field] = value;
+    const results = normalizeResultsForFourYears(formData.results);
+    const targetYear = results[selectedResultYearIndex];
+    if (!targetYear || !targetYear.subjects || !targetYear.subjects[subIndex]) return;
+    const subjects = [...targetYear.subjects];
+    subjects[subIndex] = { ...subjects[subIndex], [field]: value };
     if (field === 'internal' || field === 'external') {
       const inMark = Number(field === 'internal' ? value : subjects[subIndex].internal) || 0;
       const exMark = Number(field === 'external' ? value : subjects[subIndex].external) || 0;
@@ -376,29 +466,57 @@ export default function AdminEditorModal({
       else if (tot >= 50) gr = 'B';
       subjects[subIndex].grade = gr;
     }
-    results[0].subjects = subjects;
+    results[selectedResultYearIndex].subjects = subjects;
+    // Auto calculate year total marks and marks obtained
+    const totalObt = subjects.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+    const maxPossible = subjects.length * 100;
+    if (maxPossible > 0) {
+      targetYear.marksObtained = totalObt;
+      targetYear.totalMarks = maxPossible;
+      targetYear.marks = `${totalObt}/${maxPossible}`;
+      targetYear.percentage = `${((totalObt / maxPossible) * 100).toFixed(2)}%`;
+      targetYear.sgpa = `${totalObt}/${maxPossible}`;
+    }
     setFormData((prev) => ({ ...prev, results }));
   };
 
   const addResultSubject = () => {
-    const results = [...(formData.results || [])];
-    if (!results[0]) return;
-    results[0].subjects.push({
-      code: 'CSE-408',
-      name: 'Computer Graphics & Visualization',
+    const results = normalizeResultsForFourYears(formData.results);
+    const targetYear = results[selectedResultYearIndex];
+    targetYear.subjects.push({
+      code: `MBBS-${targetYear.subjects.length + 1}`,
+      name: 'CLINICAL PRACTICAL / ELECTIVE',
+      maxMarks: 100,
       internal: 25,
       external: 60,
       total: 85,
       grade: 'A+',
-      credits: 4
+      credits: 4,
+      remarks: 'Passed'
     });
+    const totalObt = targetYear.subjects.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+    const maxPossible = targetYear.subjects.length * 100;
+    targetYear.marksObtained = totalObt;
+    targetYear.totalMarks = maxPossible;
+    targetYear.marks = `${totalObt}/${maxPossible}`;
+    targetYear.percentage = `${((totalObt / maxPossible) * 100).toFixed(2)}%`;
+    targetYear.sgpa = `${totalObt}/${maxPossible}`;
     setFormData((prev) => ({ ...prev, results }));
   };
 
   const removeResultSubject = (subIndex) => {
-    const results = [...(formData.results || [])];
-    if (!results[0]) return;
-    results[0].subjects = results[0].subjects.filter((_, i) => i !== subIndex);
+    const results = normalizeResultsForFourYears(formData.results);
+    const targetYear = results[selectedResultYearIndex];
+    targetYear.subjects = targetYear.subjects.filter((_, i) => i !== subIndex);
+    const totalObt = targetYear.subjects.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+    const maxPossible = targetYear.subjects.length * 100;
+    if (maxPossible > 0) {
+      targetYear.marksObtained = totalObt;
+      targetYear.totalMarks = maxPossible;
+      targetYear.marks = `${totalObt}/${maxPossible}`;
+      targetYear.percentage = `${((totalObt / maxPossible) * 100).toFixed(2)}%`;
+      targetYear.sgpa = `${totalObt}/${maxPossible}`;
+    }
     setFormData((prev) => ({ ...prev, results }));
   };
 
@@ -1026,8 +1144,37 @@ export default function AdminEditorModal({
 
               {/* Upper Summary Cards KPI Controls */}
               <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px 16px', marginBottom: '18px' }}>
-                <div style={{ fontSize: '13px', fontWeight: '800', color: '#0f2137', marginBottom: '8px' }}>
-                  📊 Uppar Wala Summary Cards (Leave blank for automatic calculation from transactions table below):
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: '800', color: '#0f2137' }}>
+                    📊 Uppar Wala Summary Cards (Fee KPI Boxes):
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const sum = (formData.feeTransactions || []).reduce((s, c) => s + (Number(c.amount) || 0), 0);
+                      const latestFee = (formData.feeTransactions && formData.feeTransactions[0]) ? Number(formData.feeTransactions[0].amount) || 0 : 0;
+                      setFormData(prev => ({
+                        ...prev,
+                        totalFeePaid: sum,
+                        currentSemesterFee: latestFee,
+                        outstandingBalance: 0,
+                        feeStatus: 'Cleared'
+                      }));
+                      if (showToast) showToast(`Fee synced: Total ₹${sum.toLocaleString('en-IN')}, Current ₹${latestFee.toLocaleString('en-IN')}`);
+                    }}
+                    style={{
+                      background: '#059669',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      fontSize: '11.5px',
+                      fontWeight: '700',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    🔄 Auto-Calculate from Transactions (₹ {(formData.feeTransactions || []).reduce((s, c) => s + (Number(c.amount) || 0), 0).toLocaleString('en-IN')})
+                  </button>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
                   <div>
@@ -1265,21 +1412,56 @@ export default function AdminEditorModal({
             <div className="admin-subtable-section">
               <div className="subtable-header">
                 <div>
-                  <h4>Semester Results & Marksheet Grade Details</h4>
-                  <p>Changes will directly update the official printable Semester Grade Marksheet</p>
+                  <h4>Year 1 to Year 4 Results & Marksheet Grade Details</h4>
+                  <p>Changes will directly update the official printable Semester/Year Grade Marksheets (Year 1 to Year 4)</p>
                 </div>
-                <button type="button" className="admin-btn-secondary" onClick={addResultSubject}>
-                  ➕ Add Subject Result
-                </button>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="admin-btn-secondary"
+                    onClick={() => downloadMarksheet(formData, currentResult)}
+                    title="Download/Preview this Year's Marksheet"
+                  >
+                    🖨️ Download {currentResult.semester} Marksheet PDF
+                  </button>
+                  <button type="button" className="admin-btn-secondary" onClick={addResultSubject}>
+                    ➕ Add Subject Result
+                  </button>
+                </div>
+              </div>
+
+              {/* Year Selector Tabs: Year 1, Year 2, Year 3, Year 4 */}
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', background: '#e2e8f0', padding: '6px', borderRadius: '8px', flexWrap: 'wrap' }}>
+                {['Year 1', 'Year 2', 'Year 3', 'Year 4'].map((yr, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setSelectedResultYearIndex(idx)}
+                    style={{
+                      padding: '8px 18px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      fontWeight: '800',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      background: selectedResultYearIndex === idx ? '#0f2137' : 'transparent',
+                      color: selectedResultYearIndex === idx ? '#ffffff' : '#334155',
+                      boxShadow: selectedResultYearIndex === idx ? '0 2px 6px rgba(0,0,0,0.18)' : 'none',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    🎓 {yr} Marksheet
+                  </button>
+                ))}
               </div>
 
               {currentResult && (
                 <div className="admin-form-grid" style={{ marginBottom: '18px', background: '#f8fafc', padding: '14px', borderRadius: '8px' }}>
                   <div className="form-group">
-                    <label>Result Semester Title</label>
+                    <label>Result Academic Year / Title</label>
                     <input
                       type="text"
-                      value={currentResult.semester || 'Semester 4'}
+                      value={currentResult.semester || `Year ${selectedResultYearIndex + 1}`}
                       onChange={(e) => handleResultMetaChange('semester', e.target.value)}
                     />
                   </div>
@@ -1287,27 +1469,58 @@ export default function AdminEditorModal({
                     <label>Exam Session</label>
                     <input
                       type="text"
-                      value={currentResult.examSession || 'June 2026'}
+                      value={currentResult.examSession || 'June 2017'}
                       onChange={(e) => handleResultMetaChange('examSession', e.target.value)}
                     />
                   </div>
                   <div className="form-group">
-                    <label>Semester Marks</label>
+                    <label>Marks Obtained</label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 450"
+                      value={currentResult.marksObtained !== undefined ? currentResult.marksObtained : (currentResult.marks ? String(currentResult.marks).split('/')[0] : '')}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        handleResultMetaChange('marksObtained', val);
+                        const tot = currentResult.totalMarks || (currentResult.marks && String(currentResult.marks).includes('/') ? String(currentResult.marks).split('/')[1] : '600');
+                        handleResultMetaChange('marks', `${val}/${tot}`);
+                        if (Number(tot) > 0) {
+                          handleResultMetaChange('percentage', `${((Number(val) / Number(tot)) * 100).toFixed(2)}%`);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Total Marks</label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 600 or 700"
+                      value={currentResult.totalMarks !== undefined ? currentResult.totalMarks : (currentResult.marks && String(currentResult.marks).includes('/') ? String(currentResult.marks).split('/')[1] : '')}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        handleResultMetaChange('totalMarks', val);
+                        const obt = currentResult.marksObtained !== undefined ? currentResult.marksObtained : (currentResult.marks ? String(currentResult.marks).split('/')[0] : '450');
+                        handleResultMetaChange('marks', `${obt}/${val}`);
+                        if (Number(val) > 0) {
+                          handleResultMetaChange('percentage', `${((Number(obt) / Number(val)) * 100).toFixed(2)}%`);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Percentage (%)</label>
                     <input
                       type="text"
-                      placeholder="e.g. 450/600, 85%, or 8.5"
-                      value={currentResult.marks !== undefined ? currentResult.marks : (currentResult.sgpa || '')}
-                      onChange={(e) => {
-                        handleResultMetaChange('marks', e.target.value);
-                        handleResultMetaChange('sgpa', e.target.value);
-                      }}
+                      placeholder="e.g. 75.00% or 66.73%"
+                      value={currentResult.percentage !== undefined ? currentResult.percentage : ''}
+                      onChange={(e) => handleResultMetaChange('percentage', e.target.value)}
                     />
                   </div>
                   <div className="form-group">
                     <label>Division / Status</label>
                     <input
                       type="text"
-                      value={currentResult.status || 'PASSED WITH DISTINCTION'}
+                      value={currentResult.status || 'PASSED FIRST DIVISION'}
                       onChange={(e) => handleResultMetaChange('status', e.target.value)}
                     />
                   </div>
@@ -1322,9 +1535,9 @@ export default function AdminEditorModal({
                       <th>Subject Title</th>
                       <th style={{ width: '80px' }}>Internal (30)</th>
                       <th style={{ width: '80px' }}>External (70)</th>
-                      <th style={{ width: '70px' }}>Total</th>
+                      <th style={{ width: '70px' }}>Total (100)</th>
                       <th style={{ width: '70px' }}>Grade</th>
-                      <th style={{ width: '70px' }}>Credits</th>
+                      <th style={{ width: '70px' }}>Max Marks</th>
                       <th style={{ width: '50px' }}>Action</th>
                     </tr>
                   </thead>
@@ -1377,10 +1590,10 @@ export default function AdminEditorModal({
                         <td>
                           <input
                             type="number"
-                            min="1"
-                            max="10"
-                            value={sub.credits}
-                            onChange={(e) => handleResultSubjectChange(idx, 'credits', e.target.value)}
+                            min="10"
+                            max="200"
+                            value={sub.maxMarks || 100}
+                            onChange={(e) => handleResultSubjectChange(idx, 'maxMarks', e.target.value)}
                             style={{ textAlign: 'center' }}
                           />
                         </td>

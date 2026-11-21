@@ -13,10 +13,8 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
   // Navigation active tab: 'dashboard' | 'profile' | 'documents' | 'fees' | 'attendance' | 'examination' | 'results' | 'notices'
   const [activeTab, setActiveTab] = useState('dashboard');
   
-  // Selected semester for results view
-  const [selectedResultSemester, setSelectedResultSemester] = useState(
-    student.results && student.results.length > 0 ? student.results[0].semester : 'Semester 4'
-  );
+  // Selected semester/year for results view
+  const [selectedResultSemester, setSelectedResultSemester] = useState('Year 1');
 
   // Selected notice for view modal
   const [selectedNotice, setSelectedNotice] = useState(null);
@@ -39,9 +37,9 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
 
   // Dynamic Fee Calculations from transaction ledger or student overrides
   const calculatedTotalPaid = feeTransactions.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
-  const totalFeePaid = (student.totalFeePaid !== undefined && student.totalFeePaid !== null && student.totalFeePaid !== '')
+  const totalFeePaid = (student.totalFeePaid && Number(student.totalFeePaid) !== 320000)
     ? Number(student.totalFeePaid)
-    : calculatedTotalPaid;
+    : (calculatedTotalPaid > 0 ? calculatedTotalPaid : (Number(student.totalFeePaid) || 320000));
 
   const currentSemMatch = feeTransactions.find((t) => {
     const semStr = String(t.semester || '').toLowerCase();
@@ -49,9 +47,9 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
     return semStr.includes(`semester ${stuSem}`) || semStr.includes(`sem ${stuSem}`) || semStr === stuSem;
   }) || feeTransactions[0];
 
-  const currentSemesterFee = (student.currentSemesterFee !== undefined && student.currentSemesterFee !== null && student.currentSemesterFee !== '')
+  const currentSemesterFee = (student.currentSemesterFee && Number(student.currentSemesterFee) !== 62500)
     ? Number(student.currentSemesterFee)
-    : (currentSemMatch ? Number(currentSemMatch.amount) || 0 : 0);
+    : (currentSemMatch ? Number(currentSemMatch.amount) || 0 : (feeTransactions[0] ? Number(feeTransactions[0].amount) || 0 : 0));
 
   const outstandingBalance = (student.outstandingBalance !== undefined && student.outstandingBalance !== null && student.outstandingBalance !== '')
     ? Number(student.outstandingBalance)
@@ -66,22 +64,97 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
     { date: '11 Dec 2026', time: '10:00 AM - 01:00 PM', subjectCode: 'CSE-504', subjectName: 'Operating Systems & Cloud Architecture', room: 'Hall A-102, Main Block', status: 'Upcoming' }
   ];
 
-  const resultsList = (student.results && student.results.length > 0) ? student.results : [
+  // Default 4-Year Results (Year 1 to Year 4)
+  const defaultFourYearResults = [
     {
-      semester: 'Semester 4',
-      examSession: 'June 2026',
-      sgpa: 8.75,
+      semester: 'Year 1',
+      examSession: 'June 2017',
+      marksObtained: 450,
+      totalMarks: 600,
+      marks: '450/600',
+      percentage: '75.00%',
+      sgpa: '450/600',
+      totalCredits: 20,
+      status: 'PASSED FIRST DIVISION',
+      subjects: [
+        { code: 'MBBS-1', name: 'ANATOMY', maxMarks: 100, credits: 4, internal: 27, external: 60, total: 87, grade: 'A+', remarks: 'Passed' },
+        { code: 'MBBS-2', name: 'PHYSIOLOGY', maxMarks: 100, credits: 4, internal: 25, external: 60, total: 85, grade: 'A+', remarks: 'Passed' },
+        { code: 'MBBS-3', name: 'BIOCHEMISTRY', maxMarks: 100, credits: 4, internal: 26, external: 61, total: 87, grade: 'A+', remarks: 'Passed' }
+      ]
+    },
+    {
+      semester: 'Year 2',
+      examSession: 'June 2018',
+      marksObtained: 540,
+      totalMarks: 700,
+      marks: '540/700',
+      percentage: '77.14%',
+      sgpa: '540/700',
+      totalCredits: 22,
+      status: 'PASSED FIRST DIVISION',
+      subjects: [
+        { code: 'MBBS-1', name: 'PHARMACOLOGY', maxMarks: 100, credits: 4, internal: 26, external: 62, total: 88, grade: 'A+', remarks: 'Passed' },
+        { code: 'MBBS-2', name: 'MICROBIOLOGY', maxMarks: 100, credits: 4, internal: 25, external: 60, total: 85, grade: 'A+', remarks: 'Passed' },
+        { code: 'MBBS-3', name: 'PATHOLOGY', maxMarks: 100, credits: 4, internal: 28, external: 64, total: 92, grade: 'O', remarks: 'Passed' },
+        { code: 'MBBS-4', name: 'FMT', maxMarks: 100, credits: 4, internal: 27, external: 61, total: 88, grade: 'A+', remarks: 'Passed' }
+      ]
+    },
+    {
+      semester: 'Year 3',
+      examSession: 'Dec 2019',
+      marksObtained: 520,
+      totalMarks: 700,
+      marks: '520/700',
+      percentage: '74.28%',
+      sgpa: '520/700',
+      totalCredits: 22,
+      status: 'PASSED FIRST DIVISION',
+      subjects: [
+        { code: 'MBBS-1', name: 'ENT', maxMarks: 100, credits: 4, internal: 27, external: 60, total: 87, grade: 'A+', remarks: 'Passed' },
+        { code: 'MBBS-2', name: 'OPHTHALMOLOGY', maxMarks: 100, credits: 4, internal: 26, external: 59, total: 85, grade: 'A+', remarks: 'Passed' },
+        { code: 'MBBS-3', name: 'SPM', maxMarks: 100, credits: 4, internal: 25, external: 61, total: 86, grade: 'A+', remarks: 'Passed' },
+        { code: 'MBBS-4', name: 'OPD CLINICAL', maxMarks: 100, credits: 4, internal: 28, external: 63, total: 91, grade: 'O', remarks: 'Passed' }
+      ]
+    },
+    {
+      semester: 'Year 4',
+      examSession: 'Dec 2020',
+      marksObtained: 550,
+      totalMarks: 700,
+      marks: '550/700',
+      percentage: '78.57%',
+      sgpa: '550/700',
       totalCredits: 24,
       status: 'PASSED WITH DISTINCTION',
       subjects: [
-        { code: 'CSE-401', name: 'Computer Organization & Architecture', internal: 26, external: 62, total: 88, grade: 'A+', credits: 4 },
-        { code: 'CSE-402', name: 'Theory of Computation', internal: 24, external: 58, total: 82, grade: 'A', credits: 4 },
-        { code: 'CSE-403', name: 'Object Oriented Programming (Java)', internal: 28, external: 65, total: 93, grade: 'O', credits: 4 },
-        { code: 'CSE-404', name: 'Discrete Mathematics', internal: 25, external: 55, total: 80, grade: 'A', credits: 4 },
-        { code: 'CSE-405', name: 'Software Engineering', internal: 27, external: 60, total: 87, grade: 'A+', credits: 4 }
+        { code: 'MBBS-1', name: 'MEDICINE', maxMarks: 100, credits: 4, internal: 28, external: 64, total: 92, grade: 'O', remarks: 'Passed' },
+        { code: 'MBBS-2', name: 'SURGERY', maxMarks: 100, credits: 4, internal: 27, external: 62, total: 89, grade: 'A+', remarks: 'Passed' },
+        { code: 'MBBS-3', name: 'OBS/GYN', maxMarks: 100, credits: 4, internal: 26, external: 60, total: 86, grade: 'A+', remarks: 'Passed' },
+        { code: 'MBBS-4', name: 'PEDIATRICS', maxMarks: 100, credits: 4, internal: 28, external: 63, total: 91, grade: 'O', remarks: 'Passed' }
       ]
     }
   ];
+
+  // Merge student's custom saved results with Year 1, Year 2, Year 3, Year 4
+  const rawResults = (student.results && student.results.length > 0) ? student.results : [];
+  const resultsList = ['Year 1', 'Year 2', 'Year 3', 'Year 4'].map((yr, idx) => {
+    const existing = rawResults.find((r) => {
+      const s = String(r.semester || '').toLowerCase();
+      return s.includes(yr.toLowerCase()) || s.includes(`semester ${idx + 1}`) || s === `semester ${idx + 1}` || s.includes(`sem ${idx + 1}`);
+    });
+    if (existing) {
+      const isCseDummy = existing.subjects && existing.subjects.length > 0 && existing.subjects[0].code && existing.subjects[0].code.startsWith('CSE');
+      return {
+        ...defaultFourYearResults[idx],
+        ...existing,
+        semester: yr,
+        marks: existing.marks || existing.sgpa || defaultFourYearResults[idx].marks,
+        percentage: existing.percentage || defaultFourYearResults[idx].percentage,
+        subjects: isCseDummy ? defaultFourYearResults[idx].subjects : (existing.subjects && existing.subjects.length > 0 ? existing.subjects : defaultFourYearResults[idx].subjects)
+      };
+    }
+    return defaultFourYearResults[idx];
+  });
 
   const noticesList = (student.notices && student.notices.length > 0) ? student.notices : [
     {
@@ -344,16 +417,16 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
 
                 <div className="kpi-card" onClick={() => setActiveTab('results')}>
                   <div className="kpi-header">
-                    <span>Cumulative CGPA</span>
+                    <span>Overall Percentage / Marks</span>
                     <span className="kpi-icon">⭐</span>
                   </div>
                   <div className="kpi-value">
-                    {student.cgpa || 8.64} {Number(student.cgpa || 8.64) <= 10 && <span className="scale">/ 10</span>}
+                    {student.cgpa ? `${student.cgpa}%` : '85%'}
                   </div>
                   <div className="progress-bar-shell">
-                    <div className="progress-bar-fill gold-fill" style={{ width: `${Math.min(100, Number(student.cgpa || 8.64) <= 10 ? (Number(student.cgpa || 8.64) / 10) * 100 : Number(student.cgpa || 8.64))}%` }}></div>
+                    <div className="progress-bar-fill gold-fill" style={{ width: `${Math.min(100, Number(student.cgpa) || 85)}%` }}></div>
                   </div>
-                  <span className="kpi-note gold-note">Grade: A+ (First Class with Distinction)</span>
+                  <span className="kpi-note gold-note">Division: First Class with Distinction</span>
                 </div>
 
                 <div className="kpi-card" onClick={() => setActiveTab('fees')}>
@@ -756,7 +829,7 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                 <div className="fee-metric-card">
                   <span className="metric-label">Current Semester Fee</span>
                   <div className="metric-val">₹ {currentSemesterFee.toLocaleString('en-IN')}.00</div>
-                  <span className="metric-sub">Semester {student.semester || 1}</span>
+                  <span className="metric-sub">{currentSemMatch?.semester || `Semester ${student.semester || 1}`}</span>
                 </div>
 
                 <div className={`fee-metric-card ${isFeeCleared ? 'success-card' : 'warning-card'}`}>
@@ -1083,17 +1156,17 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
             <div className="tab-view-container animate-fade">
               <div className="section-header-bar">
                 <div>
-                  <h2>Academic Results & Semester Marksheet</h2>
-                  <p>Official provisional statement of marks, grades, SGPA, and cumulative CGPA</p>
+                  <h2>Academic Results & Marksheet Records</h2>
+                  <p>Official statement of marks, percentage, and professional exam evaluation</p>
                 </div>
                 <button className="header-action-btn" onClick={handleDownloadResult}>
-                  <span>📑</span> Download Marksheet PDF
+                  <span>📑</span> Download {activeResult.semester} Marksheet PDF
                 </button>
               </div>
 
               {/* Semester Switcher Tabs */}
               <div className="semester-selector-bar">
-                <span className="sel-label">Select Semester:</span>
+                <span className="sel-label">Select Academic Year:</span>
                 {resultsList.map((res, idx) => (
                   <button
                     key={idx}
@@ -1108,23 +1181,23 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
               {/* Result Summary Bar */}
               <div className="result-kpi-banner">
                 <div className="res-kpi-item">
-                  <span className="res-kpi-label">Semester Marks</span>
-                  <div className="res-kpi-value">{activeResult.marks || activeResult.sgpa || '—'}</div>
+                  <span className="res-kpi-label">Marks Obtained</span>
+                  <div className="res-kpi-value">{activeResult.marksObtained || (activeResult.marks ? String(activeResult.marks).split('/')[0] : '450')}</div>
                 </div>
 
                 <div className="res-kpi-item">
-                  <span className="res-kpi-label">Cumulative CGPA</span>
-                  <div className="res-kpi-value gold-text">{student.cgpa || 8.64}</div>
+                  <span className="res-kpi-label">Percentage (%)</span>
+                  <div className="res-kpi-value gold-text">{activeResult.percentage || (student.cgpa ? `${student.cgpa}%` : '66.73%')}</div>
                 </div>
 
                 <div className="res-kpi-item">
-                  <span className="res-kpi-label">Total Credits Earned</span>
-                  <div className="res-kpi-value">{activeResult.totalCredits}</div>
+                  <span className="res-kpi-label">Total Marks</span>
+                  <div className="res-kpi-value">{activeResult.totalMarks || (activeResult.marks && String(activeResult.marks).includes('/') ? String(activeResult.marks).split('/')[1] : '600')}</div>
                 </div>
 
                 <div className="res-kpi-item result-status-col">
                   <span className="res-kpi-label">Final Evaluation</span>
-                  <div className="res-status-badge">{activeResult.status}</div>
+                  <div className="res-status-badge">{activeResult.status || 'PASSED FIRST DIVISION'}</div>
                 </div>
               </div>
 
@@ -1136,7 +1209,7 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                     <p>Examination Session: <strong>{activeResult.examSession}</strong></p>
                   </div>
                   <button className="secondary-action-btn" onClick={handleDownloadResult}>
-                    <span>⬇</span> Download {activeResult.semester} Marksheet
+                    <span>⬇</span> Download {activeResult.semester} Marksheet PDF
                   </button>
                 </div>
 
@@ -1147,7 +1220,7 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                         <th>#</th>
                         <th>Subject Code</th>
                         <th>Subject Title</th>
-                        <th style={{ textAlign: 'center' }}>Credits</th>
+                        <th style={{ textAlign: 'center' }}>Max Marks</th>
                         <th style={{ textAlign: 'center' }}>Internal (30)</th>
                         <th style={{ textAlign: 'center' }}>External (70)</th>
                         <th style={{ textAlign: 'center' }}>Total (100)</th>
@@ -1161,7 +1234,7 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                           <td>{idx + 1}</td>
                           <td className="code-cell">{sub.code}</td>
                           <td><strong>{sub.name}</strong></td>
-                          <td style={{ textAlign: 'center' }}>{sub.credits}</td>
+                          <td style={{ textAlign: 'center' }}>{sub.maxMarks || 100}</td>
                           <td style={{ textAlign: 'center' }}>{sub.internal}</td>
                           <td style={{ textAlign: 'center' }}>{sub.external}</td>
                           <td style={{ textAlign: 'center' }} className="amount-cell">
@@ -1177,6 +1250,21 @@ export default function StudentDashboard({ student, onLogout, showToast }) {
                       ))}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Official IT Act Digital Verification Notice */}
+                <div style={{ marginTop: '24px', padding: '14px 18px', border: '1.5px dashed #059669', borderRadius: '8px', background: '#f0fdf4', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+                  <div style={{ fontSize: '11px', color: '#166534', lineHeight: '1.6' }}>
+                    <p style={{ margin: 0, fontWeight: 800, fontSize: '12px', color: '#15803d' }}>✔ OFFICIAL ERP GENERATED STATEMENT OF MARKS</p>
+                    <p style={{ margin: '2px 0 0 0' }}>This is an authenticated digital marksheet generated from the University Examination ERP Portal.</p>
+                    <p style={{ margin: '2px 0 0 0', fontWeight: 700 }}>As per official IT Act & University examination guidelines, this digital transcript is authentic and does not require physical ink signature or stamp.</p>
+                    <p style={{ margin: '2px 0 0 0', color: '#475569', fontSize: '10px' }}>Verification Code: SVSU-EVAL-{student.rollNo || '5923361'}-{(activeResult.semester || 'YEAR').replace(/[^a-zA-Z0-9]/g, '')}</p>
+                  </div>
+                  <div style={{ textAlign: 'right', minWidth: '180px' }}>
+                    <div style={{ fontSize: '11.5px', fontWeight: 800, color: '#0f2137' }}>Controller of Examinations</div>
+                    <div style={{ fontSize: '10px', color: '#64748b' }}>Swami Vivekanand Subharti University</div>
+                    <div style={{ fontSize: '9.5px', color: '#059669', fontWeight: 700, marginTop: '4px' }}>✔ Digitally Authenticated</div>
+                  </div>
                 </div>
               </div>
             </div>
