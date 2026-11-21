@@ -197,6 +197,7 @@ export default function AdminEditorModal({
 }) {
   // Active Tab: 'profile' | 'academic' | 'fees' | 'attendance' | 'exam' | 'results' | 'notices'
   const [activeTab, setActiveTab] = useState('profile');
+  const [isFullScreen, setIsFullScreen] = useState(true);
 
   // List of all students available in database/mock
   const [studentList, setStudentList] = useState([]);
@@ -687,8 +688,8 @@ export default function AdminEditorModal({
 
   if (!formData) {
     return (
-      <div className="modal-overlay">
-        <div className="modal-box admin-editor-modal">
+      <div className="modal-overlay admin-modal-overlay">
+        <div className="admin-editor-modal">
           <p style={{ padding: '40px', textAlign: 'center' }}>Loading SVSU ERP Data Editor...</p>
         </div>
       </div>
@@ -696,8 +697,14 @@ export default function AdminEditorModal({
   }
 
   return (
-    <div className="modal-overlay admin-modal-overlay" onClick={onClose}>
-      <div className="modal-box admin-editor-modal" onClick={(e) => e.stopPropagation()}>
+    <div
+      className={`modal-overlay admin-modal-overlay ${!isFullScreen ? 'is-windowed-overlay' : ''}`}
+      onClick={onClose}
+    >
+      <div
+        className={`admin-editor-modal ${!isFullScreen ? 'is-windowed' : ''}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Top Header */}
         <div className="admin-modal-top-bar">
           <div className="admin-modal-title">
@@ -708,6 +715,27 @@ export default function AdminEditorModal({
             </div>
           </div>
           <div className="admin-header-actions">
+            <button
+              type="button"
+              onClick={() => setIsFullScreen(prev => !prev)}
+              title={isFullScreen ? "Switch to Windowed View" : "Expand to Full Screen"}
+              style={{
+                background: '#1e293b',
+                color: '#f8fafc',
+                border: '1px solid #475569',
+                padding: '7px 13px',
+                borderRadius: '6px',
+                fontSize: '12.5px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'all 0.2s'
+              }}
+            >
+              {isFullScreen ? '🗗 Windowed' : '⛶ Full Screen'}
+            </button>
             <button
               className="admin-btn-save"
               onClick={handleSaveAll}
