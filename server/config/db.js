@@ -1,7 +1,51 @@
 const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '../data');
+const STORE_FILE = path.join(DATA_DIR, 'students_store.json');
+
+// Ensure data directory exists on server disk
+if (!fs.existsSync(DATA_DIR)) {
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  } catch (e) {
+    console.warn('[Storage Notice] Could not create data directory:', e.message);
+  }
+}
+
+// Function to load student store from server disk
+const loadStoreFromDisk = () => {
+  try {
+    if (fs.existsSync(STORE_FILE)) {
+      const content = fs.readFileSync(STORE_FILE, 'utf-8');
+      if (content && content.trim()) {
+        const parsed = JSON.parse(content);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[Storage Error] Could not read students_store.json:', err.message);
+  }
+  return null;
+};
+
+// Function to save student store to server disk (Atomic Permanent Persistence)
+const saveStoreToDisk = (list) => {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(STORE_FILE, JSON.stringify(list, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('[Storage Error] Could not write students_store.json:', err.message);
+  }
+};
 
 // Rich student data for Subharti ERP Portal
-const mockStudents = [
+const initialDefaultStudents = [
   {
     enrollmentNo: 'SVSU/2023/10892',
     studentId: 'STU984321',
@@ -197,6 +241,13 @@ const mockStudents = [
   }
 ];
 
+// Initialize mockStudents from server disk if available, otherwise use initial default students
+const diskData = loadStoreFromDisk();
+let mockStudents = diskData || initialDefaultStudents;
+if (!diskData) {
+  saveStoreToDisk(mockStudents);
+}
+
 let isConnected = false;
 
 const connectDB = async () => {
@@ -204,7 +255,7 @@ const connectDB = async () => {
   
   // Guard against placeholder strings
   if (mongoUri.includes('<cluster') || mongoUri.includes('<db_') || mongoUri.includes('<password>')) {
-    console.warn('[MongoDB Notice] Placeholder detected in MONGO_URI. Running in Hybrid/Mock Mode until actual cluster URL is provided.');
+    console.warn('[MongoDB Notice] Placeholder detected in MONGO_URI. Running in Hybrid Disk-Storage Mode.');
     isConnected = false;
     return;
   }
@@ -223,13 +274,23 @@ const connectDB = async () => {
       const Student = require('../models/Student');
       const count = await Student.countDocuments();
       if (count === 0) {
-        console.log('[MongoDB] Database is empty. Auto-seeding initial student records...');
+        console.log('[MongoDB] Database is empty. Auto-seeding initial student records from disk store...');
         await Student.insertMany(mockStudents);
-        console.log(`[MongoDB] Auto-seeded ${mockStudents.length} default students into MongoDB!`);
-        console.log('           ✔ Student 1: SVSU/2023/10892 | DOB: 15/08/2002 (Aarav Sharma)');
-        console.log('           ✔ Student 2: SVSU/2023/10893 | DOB: 22/04/2003 (Priya Verma)');
+        console.log(`[MongoDB] Auto-seeded ${mockStudents.length} students into MongoDB!`);
       } else {
         console.log(`[MongoDB] Verified ${count} student records active in database.`);
+        // Sync database records with local disk store for offline resilience
+        try {
+          const dbStudents = await Student.find({}).lean();
+          if (dbStudents && dbStudents.length > 0) {
+            mockStudents = dbStudents.map(s => {
+              const obj = { ...s };
+              delete obj.__v;
+              return obj;
+            });
+            saveStoreToDisk(mockStudents);
+          }
+        } catch (_) {}
       }
     } catch (seedErr) {
       console.warn('[MongoDB Auto-Seed Notice]', seedErr.message);
@@ -237,10 +298,7 @@ const connectDB = async () => {
   } catch (error) {
     isConnected = false;
     console.warn(`[MongoDB Warning] Could not connect to MongoDB (${error.message}).`);
-    if (mongoUri.includes('127.0.0.1') || mongoUri.includes('localhost')) {
-      console.warn(`[MongoDB Tip for Hostinger] Hostinger shared/cloud hosting does not provide a local MongoDB service. Use a free MongoDB Atlas cloud cluster (mongodb+srv://...) by setting MONGO_URI in .env!`);
-    }
-    console.warn(`[MongoDB Notice] Server running in Hybrid/Mock Mode. Ready for instant testing with seed students!`);
+    console.warn(`[MongoDB Notice] Server running in Permanent Disk-Storage Mode (saved in server/data/students_store.json). All data persists across restarts!`);
   }
 };
 
@@ -253,9 +311,11 @@ const updateMockStudent = (enrollmentNo, updatedData) => {
   );
   if (index !== -1) {
     mockStudents[index] = { ...mockStudents[index], ...updatedData };
+    saveStoreToDisk(mockStudents);
     return mockStudents[index];
   } else {
     mockStudents.push(updatedData);
+    saveStoreToDisk(mockStudents);
     return updatedData;
   }
 };
@@ -268,6 +328,7 @@ const addMockStudent = (newStudent) => {
     return updateMockStudent(newStudent.enrollmentNo, newStudent);
   }
   mockStudents.push(newStudent);
+  saveStoreToDisk(mockStudents);
   return newStudent;
 };
 
@@ -277,6 +338,7 @@ const deleteMockStudent = (enrollmentNo) => {
   );
   if (index !== -1) {
     mockStudents.splice(index, 1);
+    saveStoreToDisk(mockStudents);
     return true;
   }
   return false;

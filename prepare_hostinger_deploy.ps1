@@ -32,6 +32,10 @@ Copy-Item -Recurse 'server/controllers' (Join-Path $DeployDir 'server/controller
 Copy-Item -Recurse 'server/middleware' (Join-Path $DeployDir 'server/middleware')
 Copy-Item -Recurse 'server/models' (Join-Path $DeployDir 'server/models')
 Copy-Item -Recurse 'server/routes' (Join-Path $DeployDir 'server/routes')
+New-Item -ItemType Directory -Path (Join-Path $DeployDir 'server/data') -Force | Out-Null
+if (Test-Path 'server/data') {
+    Copy-Item -Recurse 'server/data/*' (Join-Path $DeployDir 'server/data') -ErrorAction SilentlyContinue
+}
 Copy-Item 'server/server.js' (Join-Path $DeployDir 'server/server.js')
 Copy-Item 'server/seed.js' (Join-Path $DeployDir 'server/seed.js')
 Copy-Item 'server/package.json' (Join-Path $DeployDir 'server/package.json')
