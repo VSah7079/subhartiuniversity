@@ -105,13 +105,13 @@ const initialDefaultStudents = [
         totalCredits: 24,
         status: 'PASSED WITH DISTINCTION',
         subjects: [
-          { code: 'CSE-401', name: 'Computer Organization & Architecture', internal: 26, external: 62, total: 88, grade: 'A+', credits: 4 },
-          { code: 'CSE-402', name: 'Theory of Computation', internal: 24, external: 58, total: 82, grade: 'A', credits: 4 },
-          { code: 'CSE-403', name: 'Object Oriented Programming (Java)', internal: 28, external: 65, total: 93, grade: 'O', credits: 4 },
+          { code: 'CSE-401', name: 'Computer Organization & Architecture', internal: 34, external: 54, total: 88, grade: 'A+', credits: 4 },
+          { code: 'CSE-402', name: 'Theory of Computation', internal: 30, external: 52, total: 82, grade: 'A', credits: 4 },
+          { code: 'CSE-403', name: 'Object Oriented Programming (Java)', internal: 37, external: 56, total: 93, grade: 'O', credits: 4 },
           { code: 'CSE-404', name: 'Discrete Mathematics', internal: 25, external: 55, total: 80, grade: 'A', credits: 4 },
           { code: 'CSE-405', name: 'Software Engineering', internal: 27, external: 60, total: 87, grade: 'A+', credits: 4 },
-          { code: 'CSE-406P', name: 'Java Programming Lab', internal: 29, external: 67, total: 96, grade: 'O', credits: 2 },
-          { code: 'CSE-407P', name: 'Software Engineering Project Lab', internal: 28, external: 66, total: 94, grade: 'O', credits: 2 }
+          { code: 'CSE-406P', name: 'Java Programming Lab', internal: 38, external: 58, total: 96, grade: 'O', credits: 2 },
+          { code: 'CSE-407P', name: 'Software Engineering Project Lab', internal: 36, external: 58, total: 94, grade: 'O', credits: 2 }
         ]
       },
       {
@@ -121,12 +121,12 @@ const initialDefaultStudents = [
         totalCredits: 24,
         status: 'PASSED FIRST DIVISION',
         subjects: [
-          { code: 'CSE-301', name: 'Data Structures using C++', internal: 27, external: 61, total: 88, grade: 'A+', credits: 4 },
+          { code: 'CSE-301', name: 'Data Structures using C++', internal: 34, external: 54, total: 88, grade: 'A+', credits: 4 },
           { code: 'CSE-302', name: 'Digital Logic & Circuit Design', internal: 23, external: 56, total: 79, grade: 'B+', credits: 4 },
           { code: 'CSE-303', name: 'Computer Networks', internal: 25, external: 59, total: 84, grade: 'A', credits: 4 },
           { code: 'CSE-304', name: 'Mathematics-III (Transform Calculus)', internal: 24, external: 54, total: 78, grade: 'B+', credits: 4 },
-          { code: 'CSE-305P', name: 'Data Structures Lab', internal: 28, external: 65, total: 93, grade: 'O', credits: 4 },
-          { code: 'CSE-306P', name: 'Digital Electronics Lab', internal: 27, external: 63, total: 90, grade: 'O', credits: 4 }
+          { code: 'CSE-305P', name: 'Data Structures Lab', internal: 36, external: 57, total: 93, grade: 'O', credits: 4 },
+          { code: 'CSE-306P', name: 'Digital Electronics Lab', internal: 35, external: 55, total: 90, grade: 'O', credits: 4 }
         ]
       }
     ],
@@ -221,9 +221,9 @@ const initialDefaultStudents = [
         totalCredits: 22,
         status: 'PASSED WITH DISTINCTION (TOPPER)',
         subjects: [
-          { code: 'BCA-201', name: 'Data Structures using C', internal: 29, external: 66, total: 95, grade: 'O', credits: 4 },
-          { code: 'BCA-202', name: 'Digital Electronics', internal: 27, external: 62, total: 89, grade: 'A+', credits: 4 },
-          { code: 'BCA-203', name: 'Discrete Mathematics', internal: 28, external: 64, total: 92, grade: 'O', credits: 4 }
+          { code: 'BCA-201', name: 'Data Structures using C', internal: 37, external: 58, total: 95, grade: 'O', credits: 4 },
+          { code: 'BCA-202', name: 'Digital Electronics', internal: 35, external: 54, total: 89, grade: 'A+', credits: 4 },
+          { code: 'BCA-203', name: 'Discrete Mathematics', internal: 36, external: 56, total: 92, grade: 'O', credits: 4 }
         ]
       }
     ],

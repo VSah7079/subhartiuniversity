@@ -1457,8 +1457,8 @@ export default function StudentDashboard({ student, onLogout, showToast, onStude
                         <th>Subject Code</th>
                         <th>Subject Title</th>
                         <th style={{ textAlign: 'center' }}>Max Marks</th>
-                        <th style={{ textAlign: 'center' }}>Internal (30)</th>
-                        <th style={{ textAlign: 'center' }}>External (70)</th>
+                        <th style={{ textAlign: 'center' }}>Internal (40)</th>
+                        <th style={{ textAlign: 'center' }}>External (60)</th>
                         <th style={{ textAlign: 'center' }}>Total (100)</th>
                         <th style={{ textAlign: 'center' }}>Grade</th>
                         <th>Remarks</th>

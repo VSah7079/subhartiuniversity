@@ -409,8 +409,8 @@
           {
             "code": "BCA-201",
             "name": "Data Structures using C",
-            "internal": 29,
-            "external": 66,
+            "internal": 35,
+            "external": 60,
             "total": 95,
             "grade": "O",
             "credits": 4
@@ -418,8 +418,8 @@
           {
             "code": "BCA-202",
             "name": "Digital Electronics",
-            "internal": 27,
-            "external": 62,
+            "internal": 29,
+            "external": 60,
             "total": 89,
             "grade": "A+",
             "credits": 4
@@ -427,8 +427,8 @@
           {
             "code": "BCA-203",
             "name": "Discrete Mathematics",
-            "internal": 28,
-            "external": 64,
+            "internal": 32,
+            "external": 60,
             "total": 92,
             "grade": "O",
             "credits": 4

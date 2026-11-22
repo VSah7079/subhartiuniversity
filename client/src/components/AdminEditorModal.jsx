@@ -11,9 +11,9 @@ export const DEFAULT_FOUR_YEAR_RESULTS = [
     totalCredits: 20,
     status: 'PASSED FIRST DIVISION',
     subjects: [
-      { code: 'MBBS-1', name: 'ANATOMY', credits: 4, internal: 27, external: 60, total: 87, grade: 'A+', remarks: 'Passed' },
-      { code: 'MBBS-2', name: 'PHYSIOLOGY', credits: 4, internal: 25, external: 60, total: 85, grade: 'A+', remarks: 'Passed' },
-      { code: 'MBBS-3', name: 'BIOCHEMISTRY', credits: 4, internal: 26, external: 61, total: 87, grade: 'A+', remarks: 'Passed' }
+      { code: 'MBBS-1', name: 'ANATOMY', credits: 4, internal: 33, external: 54, total: 87, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-2', name: 'PHYSIOLOGY', credits: 4, internal: 32, external: 53, total: 85, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-3', name: 'BIOCHEMISTRY', credits: 4, internal: 34, external: 53, total: 87, grade: 'A+', remarks: 'Passed' }
     ]
   },
   {
@@ -25,10 +25,10 @@ export const DEFAULT_FOUR_YEAR_RESULTS = [
     totalCredits: 22,
     status: 'PASSED FIRST DIVISION',
     subjects: [
-      { code: 'MBBS-1', name: 'PHARMACOLOGY', credits: 4, internal: 26, external: 62, total: 88, grade: 'A+', remarks: 'Passed' },
-      { code: 'MBBS-2', name: 'MICROBIOLOGY', credits: 4, internal: 25, external: 60, total: 85, grade: 'A+', remarks: 'Passed' },
-      { code: 'MBBS-3', name: 'PATHOLOGY', credits: 4, internal: 28, external: 64, total: 92, grade: 'O', remarks: 'Passed' },
-      { code: 'MBBS-4', name: 'FMT', credits: 4, internal: 27, external: 61, total: 88, grade: 'A+', remarks: 'Passed' }
+      { code: 'MBBS-1', name: 'PHARMACOLOGY', credits: 4, internal: 34, external: 54, total: 88, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-2', name: 'MICROBIOLOGY', credits: 4, internal: 32, external: 53, total: 85, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-3', name: 'PATHOLOGY', credits: 4, internal: 36, external: 56, total: 92, grade: 'O', remarks: 'Passed' },
+      { code: 'MBBS-4', name: 'FMT', credits: 4, internal: 34, external: 54, total: 88, grade: 'A+', remarks: 'Passed' }
     ]
   },
   {
@@ -40,10 +40,10 @@ export const DEFAULT_FOUR_YEAR_RESULTS = [
     totalCredits: 22,
     status: 'PASSED FIRST DIVISION',
     subjects: [
-      { code: 'MBBS-1', name: 'ENT', credits: 4, internal: 27, external: 60, total: 87, grade: 'A+', remarks: 'Passed' },
-      { code: 'MBBS-2', name: 'OPHTHALMOLOGY', credits: 4, internal: 26, external: 59, total: 85, grade: 'A+', remarks: 'Passed' },
-      { code: 'MBBS-3', name: 'SPM', credits: 4, internal: 25, external: 61, total: 86, grade: 'A+', remarks: 'Passed' },
-      { code: 'MBBS-4', name: 'OPD CLINICAL', credits: 4, internal: 28, external: 63, total: 91, grade: 'O', remarks: 'Passed' }
+      { code: 'MBBS-1', name: 'ENT', credits: 4, internal: 33, external: 54, total: 87, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-2', name: 'OPHTHALMOLOGY', credits: 4, internal: 32, external: 53, total: 85, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-3', name: 'SPM', credits: 4, internal: 32, external: 54, total: 86, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-4', name: 'OPD CLINICAL', credits: 4, internal: 35, external: 56, total: 91, grade: 'O', remarks: 'Passed' }
     ]
   },
   {
@@ -55,10 +55,10 @@ export const DEFAULT_FOUR_YEAR_RESULTS = [
     totalCredits: 24,
     status: 'PASSED WITH DISTINCTION',
     subjects: [
-      { code: 'MBBS-1', name: 'MEDICINE', credits: 4, internal: 28, external: 64, total: 92, grade: 'O', remarks: 'Passed' },
-      { code: 'MBBS-2', name: 'SURGERY', credits: 4, internal: 27, external: 62, total: 89, grade: 'A+', remarks: 'Passed' },
-      { code: 'MBBS-3', name: 'OBS/GYN', credits: 4, internal: 26, external: 60, total: 86, grade: 'A+', remarks: 'Passed' },
-      { code: 'MBBS-4', name: 'PEDIATRICS', credits: 4, internal: 28, external: 63, total: 91, grade: 'O', remarks: 'Passed' }
+      { code: 'MBBS-1', name: 'MEDICINE', credits: 4, internal: 36, external: 56, total: 92, grade: 'O', remarks: 'Passed' },
+      { code: 'MBBS-2', name: 'SURGERY', credits: 4, internal: 34, external: 55, total: 89, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-3', name: 'OBS/GYN', credits: 4, internal: 32, external: 54, total: 86, grade: 'A+', remarks: 'Passed' },
+      { code: 'MBBS-4', name: 'PEDIATRICS', credits: 4, internal: 35, external: 56, total: 91, grade: 'O', remarks: 'Passed' }
     ]
   }
 ];
@@ -1938,8 +1938,8 @@ export default function AdminEditorModal({
                       <tr>
                         <th>Subject Code</th>
                         <th>Subject Title</th>
-                        <th style={{ width: '80px' }}>Internal (30)</th>
-                        <th style={{ width: '80px' }}>External (70)</th>
+                        <th style={{ width: '80px' }}>Internal (40)</th>
+                        <th style={{ width: '80px' }}>External (60)</th>
                         <th style={{ width: '70px' }}>Total (100)</th>
                         <th style={{ width: '70px' }}>Grade</th>
                         <th style={{ width: '70px' }}>Max Marks</th>
@@ -1967,7 +1967,7 @@ export default function AdminEditorModal({
                             <input
                               type="number"
                               min="0"
-                              max="30"
+                              max="40"
                               value={sub.internal}
                               onChange={(e) => handleResultSubjectChange(idx, 'internal', e.target.value)}
                             />
@@ -1976,7 +1976,7 @@ export default function AdminEditorModal({
                             <input
                               type="number"
                               min="0"
-                              max="70"
+                              max="60"
                               value={sub.external}
                               onChange={(e) => handleResultSubjectChange(idx, 'external', e.target.value)}
                             />

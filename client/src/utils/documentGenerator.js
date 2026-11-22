@@ -502,8 +502,8 @@ export function downloadMarksheet(student, resultData) {
             <th style="padding: 8px; border: 1px solid #0f2137;">Sub Code</th>
             <th style="padding: 8px; border: 1px solid #0f2137;">Subject Description</th>
             <th style="padding: 8px; border: 1px solid #0f2137; text-align: center;">Max Marks</th>
-            <th style="padding: 8px; border: 1px solid #0f2137; text-align: center;">Internal (30)</th>
-            <th style="padding: 8px; border: 1px solid #0f2137; text-align: center;">External (70)</th>
+            <th style="padding: 8px; border: 1px solid #0f2137; text-align: center;">Internal (40)</th>
+            <th style="padding: 8px; border: 1px solid #0f2137; text-align: center;">External (60)</th>
             <th style="padding: 8px; border: 1px solid #0f2137; text-align: center;">Total (100)</th>
             <th style="padding: 8px; border: 1px solid #0f2137; text-align: center;">Grade</th>
           </tr>
