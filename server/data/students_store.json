@@ -1,11 +1,13 @@
 [
   {
+    "_id": "6b028fe209fd4956c59dfe8b",
     "enrollmentNo": "SVSU/2023/10892",
     "studentId": "STU984321",
     "rollNo": "230910245",
     "registrationNo": "REG-2023-876",
     "dob": "15082002",
     "fullName": "Aarav Sharma Verified",
+    "photoUrl": "",
     "fatherName": "Rajesh Sharma",
     "motherName": "Sunita Sharma",
     "gender": "Male",
@@ -25,6 +27,7 @@
     "attendance": 88.5,
     "cgpa": 8.64,
     "feeStatus": "Cleared",
+    "outstandingBalance": 0,
     "email": "aarav.sharma@subharti.org",
     "status": "Active",
     "subjectsAttendance": [
@@ -277,15 +280,19 @@
         "description": "All eligible students applying for UP State Scholarship must submit their verified hard-copy documents to the Scholarship Cell before 30th November 2026.",
         "signatory": "Registrar, Swami Vivekanand Subharti University"
       }
-    ]
+    ],
+    "createdAt": "2026-11-22T06:46:58.417Z",
+    "updatedAt": "2026-11-22T06:46:58.417Z"
   },
   {
+    "_id": "6b028fe209fd4956c59dfe8c",
     "enrollmentNo": "SVSU/2023/10893",
     "studentId": "STU984322",
     "rollNo": "230910246",
     "registrationNo": "REG-2023-877",
     "dob": "22042003",
     "fullName": "Priya Verma",
+    "photoUrl": "",
     "fatherName": "Sunil Verma",
     "motherName": "Kavita Verma",
     "gender": "Female",
@@ -305,6 +312,7 @@
     "attendance": 92,
     "cgpa": 9.12,
     "feeStatus": "Cleared",
+    "outstandingBalance": 0,
     "email": "priya.verma@subharti.org",
     "status": "Active",
     "subjectsAttendance": [
@@ -446,6 +454,8 @@
         "description": "End-semester examinations schedule released for all students.",
         "signatory": "Controller of Examinations, SVSU"
       }
-    ]
+    ],
+    "createdAt": "2026-11-22T06:46:58.419Z",
+    "updatedAt": "2026-11-22T06:46:58.419Z"
   }
 ]

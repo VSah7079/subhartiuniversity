@@ -1,10 +1,14 @@
+const path = require('path');
+const fs = require('fs');
+// Load environment variables from root or server directory
 require('dotenv').config();
+if (fs.existsSync(path.join(__dirname, '.env'))) {
+  require('dotenv').config({ path: path.join(__dirname, '.env'), override: true });
+}
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const compression = require('compression');
-const path = require('path');
-const fs = require('fs');
 const { connectDB, getDbStatus } = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
